@@ -1,0 +1,83 @@
+Necesito desarrollar una aplicación web completa para organizar partidos de fútbol entre amigos los lunes. La app debe tener las siguientes características:
+
+## 1. SISTEMA DE AUTENTICACIÓN
+- Registro e inicio de sesión con email y contraseña
+- Cada jugador debe ingresar con sus propias credenciales
+- Los datos de cada usuario incluyen: nombre, apellido, email, contraseña (hasheada), edad, pie dominante (zurdo/derecho)
+- La sesión debe persistir en el navegador
+
+## 2. SISTEMA DE GRUPOS INDEPENDIENTES
+- Cada grupo de amigos tiene sus propios datos, jugadores y calificaciones
+- Al crear un grupo, se genera un código único de 6 caracteres para compartir
+- Los amigos pueden unirse a un grupo existente usando ese código
+- Las valoraciones de habilidades son específicas por grupo (un jugador puede tener diferentes calificaciones en diferentes grupos)
+- Ejemplo: si juegas con amigos del barrio y del trabajo, cada grupo te califica por separado
+
+## 3. GESTIÓN DE JUGADORES
+- Visualización de todos los jugadores del grupo en cards estilo PES (Pro Evolution Soccer)
+- Cada card muestra: nombre, apellido, edad, pie dominante, y promedio general (overall)
+- Al hacer clic en un jugador, mostrar detalles completos de habilidades
+
+## 4. HABILIDADES A CALIFICAR (12 habilidades tipo PES)
+- Ataque
+- Velocidad
+- Defensa
+- Precisión
+- Potencia
+- Resistencia
+- (El sistema debe permitir agregar más habilidades en el futuro)
+- Cada habilidad se califica del 0 al 100 usando sliders
+- Las habilidades se muestran como barras de colores:
+  * 80-100: Amarillo (elite)
+  * 60-79: Verde (bueno)
+  * 0-59: Naranja (regular)
+
+## 5. SISTEMA DE CALIFICACIONES
+- Los jugadores pueden calificar las habilidades de SUS COMPAÑEROS de equipo
+- UN JUGADOR NUNCA PUEDE CALIFICARSE A SÍ MISMO
+- Cada calificación se promedia con las anteriores (un jugador recibe múltiples opiniones)
+- Al final de cada partido, la app da la opción de calificar a los compañeros
+- Las calificaciones se guardan por grupo (misma persona puede tener diferentes stats en diferentes grupos)
+
+## 6. GESTIÓN DE ASISTENCIA
+- Los jugadores registrados pueden confirmar o cancelar su presencia para el próximo partido
+- La app debe mostrar claramente quiénes están confirmados
+- Solo los jugadores confirmados participan en el sorteo de equipos
+
+## 7. DIVISIÓN DE EQUIPOS (ALEATORIA PERO BALANCEADA)
+- Algoritmo que divida a los confirmados en equipos balanceados por overall
+- Ejemplo: si somos 10 jugadores, crear 2 equipos de 5 personas
+- Los equipos deben ser aleatorios pero equilibrados (no poner a los 3 mejores en el mismo equipo)
+- Mostrar el promedio de overall de cada equipo después del sorteo
+- Permitir volver a sortear si no gusta la distribución
+
+## 8. HISTORIAL Y ESTADÍSTICAS
+- Guardar historial de partidos jugados
+- Mostrar estadísticas individuales por grupo: cantidad de partidos, promedio de calificaciones, etc.
+- Los datos persisten entre sesiones usando almacenamiento local o backend
+
+## 9. INTERFAZ PARA MÓVIL (prioritario)
+- Diseño responsive pensado para celular
+- Pestañas visibles permanentemente (sin necesidad de hover con mouse)
+- Navegación por pestañas o menú inferior fijo
+- Las cards deben ser táctiles, fáciles de tocar
+
+## 10. TECNOLOGÍA Y DESPLIEGUE
+- Desarrollar como una SPA (Single Page Application) en un solo archivo HTML/CSS/JS
+- Usar localStorage o IndexedDB para persistencia local
+- Incluir instrucciones para subir a GitHub Pages
+- Generar el archivo index.html completo listo para descargar y desplegar
+
+## FLUJO DE USUARIO ESPERADO:
+1. El usuario se registra con email/contraseña
+2. Crea o se une a un grupo mediante código
+3. Ve la lista de jugadores del grupo con sus stats
+4. Confirma su asistencia para el próximo partido
+5. Cuando hay suficientes confirmados, sortea equipos
+6. Juega el partido (offline, fuera de la app)
+7. Al final, califica a sus compañeros con los sliders
+8. Las calificaciones se actualizan y se ven reflejadas en las cards
+9. Puede ver historial y estadísticas del grupo
+
+## ENTREGABLE:
+Genera un archivo index.html completo con todas las funcionalidades integradas, que funcione sin necesidad de servidor adicional (solo abriendo el archivo o subiéndolo a GitHub Pages). Incluye CSS moderno, JavaScript vanilla (sin frameworks pesados) y comentarios explicativos en el código.
