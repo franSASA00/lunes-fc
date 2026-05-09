@@ -22,7 +22,6 @@ a{text-decoration:none;color:inherit}
 ::-webkit-scrollbar{width:4px}
 ::-webkit-scrollbar-thumb{background:var(--br);border-radius:2px}
 
-/* SHELL */
 #app{height:100dvh;display:flex;flex-direction:column}
 .screen{display:none;flex-direction:column;height:100%}
 .screen.active{display:flex}
@@ -62,7 +61,6 @@ a{text-decoration:none;color:inherit}
 .tab-item.active::before{content:'';position:absolute;top:0;left:20%;right:20%;height:2px;background:var(--ac);border-radius:0 0 3px 3px}
 .tab-icon{font-size:22px;line-height:1}
 
-/* PAGE HEADER */
 .page-header{display:flex;align-items:center;justify-content:space-between;padding:16px 0 20px}
 .page-title{font-family:'Bebas Neue',sans-serif;font-size:30px;letter-spacing:2px;background:linear-gradient(135deg,var(--tx),var(--mu));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .page-subtitle{font-size:13px;color:var(--mu);margin-top:2px}
@@ -111,8 +109,6 @@ a{text-decoration:none;color:inherit}
 .modal-overlay.open .modal-sheet{transform:translateY(0)}
 .modal-handle{width:36px;height:4px;background:var(--br);border-radius:2px;margin:12px auto 0}
 .modal-body{padding:20px 20px 40px}
-.modal-title{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:2px;margin-bottom:4px}
-.modal-subtitle{font-size:13px;color:var(--mu);margin-bottom:20px}
 .modal-close{position:absolute;top:16px;right:16px;color:var(--mu);font-size:24px;width:32px;height:32px;display:flex;align-items:center;justify-content:center}
 .modal-header-rel{position:relative}
 
@@ -166,7 +162,6 @@ a{text-decoration:none;color:inherit}
 .stat-card .val{font-family:'Bebas Neue',sans-serif;font-size:36px;color:var(--ac)}
 .stat-card .lbl{font-size:11px;color:var(--mu);text-transform:uppercase;letter-spacing:1px;margin-top:2px}
 
-/* MISC */
 .section-title{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;color:var(--mu);margin-bottom:12px;margin-top:20px;display:flex;align-items:center;gap:8px}
 .section-title::after{content:'';flex:1;height:1px;background:var(--br)}
 .chip{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:600;letter-spacing:.5px}
@@ -188,12 +183,28 @@ a{text-decoration:none;color:inherit}
 .rate-avatar{width:50px;height:50px;border-radius:50%;background:linear-gradient(135deg,var(--ac),#0077ff);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:22px;color:#000;flex-shrink:0}
 .rate-name{font-weight:700;font-size:17px}
 .rate-sub{font-size:12px;color:var(--mu);margin-top:2px}
+
+/* LOADING OVERLAY */
+#loading-overlay{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999;transition:opacity .4s}
+#loading-overlay.hidden{opacity:0;pointer-events:none}
+#loading-overlay .logo{font-family:'Bebas Neue',sans-serif;font-size:52px;letter-spacing:4px;background:linear-gradient(135deg,var(--ac),#0077ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+#loading-overlay .sub{color:var(--mu);font-size:13px;letter-spacing:3px;margin-top:8px}
+.spinner{width:32px;height:32px;border:3px solid var(--br);border-top-color:var(--ac);border-radius:50%;animation:spin .8s linear infinite;margin-top:24px}
+@keyframes spin{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
 <div id="app">
 
-  <div id="auth-screen" class="screen active">
+  <!-- LOADING -->
+  <div id="loading-overlay">
+    <div class="logo">LunesFC</div>
+    <div class="sub">Cargando...</div>
+    <div class="spinner"></div>
+  </div>
+
+  <!-- AUTH -->
+  <div id="auth-screen" class="screen">
     <div class="auth-logo">
       <span class="auth-ball">⚽</span>
       <div class="brand">LunesFC</div>
@@ -255,6 +266,7 @@ a{text-decoration:none;color:inherit}
     </div>
   </div>
 
+  <!-- GROUP SCREEN -->
   <div id="group-screen" class="screen">
     <button class="btn-logout" onclick="doLogout()">Salir</button>
     <div class="group-screen-logo">LunesFC</div>
@@ -281,6 +293,7 @@ a{text-decoration:none;color:inherit}
     </div>
   </div>
 
+  <!-- MAIN -->
   <div id="main-screen" class="screen">
     <div class="main-content" id="main-content"></div>
     <nav class="tab-bar">
@@ -302,177 +315,303 @@ a{text-decoration:none;color:inherit}
 
 <div class="toast" id="toast"></div>
 
-<script>
-const SKILLS=['Ataque','Velocidad','Defensa','Precisión','Potencia','Resistencia'];
+<!-- FIREBASE SDK -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, query, where, getDocs, arrayUnion, onSnapshot }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-const DB={
-  get:(k,d=null)=>{try{const v=localStorage.getItem('lfc_'+k);return v?JSON.parse(v):d}catch{return d}},
-  set:(k,v)=>localStorage.setItem('lfc_'+k,JSON.stringify(v)),
-  del:k=>localStorage.removeItem('lfc_'+k)
+// ── FIREBASE CONFIG ──────────────────────────────────────────
+const firebaseConfig = {
+  apiKey: "AIzaSyAW4bJNXEiffWr3Ha746eL1pp6D6Ib2bv4",
+  authDomain: "applunesfc.firebaseapp.com",
+  projectId: "applunesfc",
+  storageBucket: "applunesfc.firebasestorage.app",
+  messagingSenderId: "412960951744",
+  appId: "1:412960951744:web:47a0022d90845551290c25",
+  measurementId: "G-G8NBK410JL"
 };
 
-function simpleHash(s){let h=5381;for(let i=0;i<s.length;i++)h=((h<<5)+h)^s.charCodeAt(i);return(h>>>0).toString(16).padStart(8,'0')}
-function genCode(){const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let r='';for(let i=0;i<6;i++)r+=c[Math.floor(Math.random()*c.length)];return r}
+const app   = initializeApp(firebaseConfig);
+const auth  = getAuth(app);
+const db    = getFirestore(app);
 
-let currentUser=DB.get('session',null);
-let currentGroup=DB.get('currentGroup',null);
-let currentTab='jugadores';
+// ── STATE ────────────────────────────────────────────────────
+const SKILLS = ['Ataque','Velocidad','Defensa','Precisión','Potencia','Resistencia'];
+let currentUser  = null;   // Firebase user + profile
+let currentGroup = null;
+let currentTab   = 'jugadores';
+let groupMembers = [];     // cached members of current group
+let groupUnsubscribe = null;
 
-let _toastTimer;
-function showToast(msg,dur=2500){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(_toastTimer);_toastTimer=setTimeout(()=>t.classList.remove('show'),dur)}
-function openModal(id){document.getElementById(id).classList.add('open')}
-function closeModal(id){document.getElementById(id).classList.remove('open')}
+// ── HELPERS ──────────────────────────────────────────────────
+function v(id){ return document.getElementById(id).value.trim() }
+function showErr(el,msg){ el.textContent=msg; el.classList.add('show') }
+function hideErr(el){ el.classList.remove('show') }
 
-function switchAuthTab(tab){
-  document.querySelectorAll('.auth-tab').forEach((el,i)=>el.classList.toggle('active',(i===0&&tab==='login')||(i===1&&tab==='register')));
-  document.getElementById('login-form').classList.toggle('active',tab==='login');
-  document.getElementById('register-form').classList.toggle('active',tab==='register');
+let _tt;
+function showToast(msg,dur=2500){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  clearTimeout(_tt); _tt=setTimeout(()=>t.classList.remove('show'),dur);
 }
+function openModal(id){ document.getElementById(id).classList.add('open') }
+function closeModal(id){ document.getElementById(id).classList.remove('open') }
+window.closeModal = closeModal;
 
-function doRegister(){
-  const n=v('reg-nombre'),a=v('reg-apellido'),e=v('reg-email').toLowerCase(),p=v('reg-pass'),edad=parseInt(v('reg-edad')),pie=v('reg-pie');
-  const err=document.getElementById('reg-error');
-  if(!n||!a||!e||!p||!edad||!pie){return showErr(err,'Completá todos los campos')}
-  if(p.length<6)return showErr(err,'Contraseña muy corta');
-  if(!e.includes('@'))return showErr(err,'Email inválido');
-  const users=DB.get('users',{});
-  if(users[e])return showErr(err,'Email ya registrado');
-  const uid='u_'+Date.now();
-  users[e]={uid,nombre:n,apellido:a,email:e,passHash:simpleHash(p),edad,pie,createdAt:Date.now()};
-  DB.set('users',users);
-  currentUser=users[e];DB.set('session',currentUser);
-  err.classList.remove('show');showApp();
-}
+function hideLoading(){ document.getElementById('loading-overlay').classList.add('hidden') }
 
-function doLogin(){
-  const e=v('login-email').toLowerCase(),p=v('login-pass');
-  const err=document.getElementById('login-error');
-  const user=DB.get('users',{})[e];
-  if(!user||user.passHash!==simpleHash(p))return showErr(err,'Email o contraseña incorrectos');
-  currentUser=user;DB.set('session',user);err.classList.remove('show');showApp();
-}
-
-function doLogout(){currentUser=null;currentGroup=null;DB.del('session');DB.del('currentGroup');showScreen('auth-screen')}
-
-function v(id){return document.getElementById(id).value.trim()}
-function showErr(el,msg){el.textContent=msg;el.classList.add('show')}
-
-function showApp(){
-  if(!currentUser){showScreen('auth-screen');return}
-  currentGroup?showMain():showGroupScreen();
-}
 function showScreen(id){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
 }
-function showGroupScreen(){showScreen('group-screen');document.getElementById('group-welcome').textContent=`Hola, ${currentUser.nombre}! 👋`;renderMyGroups()}
-function showMain(){showScreen('main-screen');showTab(currentTab||'jugadores')}
 
-function getGroups(){return DB.get('groups',{})}
-function saveGroups(g){DB.set('groups',g)}
-function getMyGroups(){return Object.values(getGroups()).filter(g=>g.members&&g.members.includes(currentUser.uid))}
+function overallColor(v){ return v>=80?'var(--yw)':v>=60?'var(--gr)':'var(--or)' }
 
-function renderMyGroups(){
+// ── AUTH ─────────────────────────────────────────────────────
+window.switchAuthTab = function(tab){
+  document.querySelectorAll('.auth-tab').forEach((el,i)=>
+    el.classList.toggle('active',(i===0&&tab==='login')||(i===1&&tab==='register')));
+  document.getElementById('login-form').classList.toggle('active',tab==='login');
+  document.getElementById('register-form').classList.toggle('active',tab==='register');
+};
+
+window.doRegister = async function(){
+  const nombre=v('reg-nombre'), apellido=v('reg-apellido'), email=v('reg-email').toLowerCase();
+  const pass=v('reg-pass'), edad=parseInt(v('reg-edad')), pie=v('reg-pie');
+  const err=document.getElementById('reg-error');
+  hideErr(err);
+  if(!nombre||!apellido||!email||!pass||!edad||!pie) return showErr(err,'Completá todos los campos');
+  if(pass.length<6) return showErr(err,'Contraseña muy corta');
+  try {
+    const cred = await createUserWithEmailAndPassword(auth, email, pass);
+    await setDoc(doc(db,'users',cred.user.uid), { uid:cred.user.uid, nombre, apellido, email, edad, pie, createdAt:Date.now() });
+    showToast('¡Cuenta creada!');
+  } catch(e) {
+    const msgs = { 'auth/email-already-in-use':'Email ya registrado', 'auth/invalid-email':'Email inválido' };
+    showErr(err, msgs[e.code]||e.message);
+  }
+};
+
+window.doLogin = async function(){
+  const email=v('login-email').toLowerCase(), pass=v('login-pass');
+  const err=document.getElementById('login-error');
+  hideErr(err);
+  try {
+    await signInWithEmailAndPassword(auth, email, pass);
+  } catch(e) {
+    showErr(err,'Email o contraseña incorrectos');
+  }
+};
+
+window.doLogout = async function(){
+  if(groupUnsubscribe){ groupUnsubscribe(); groupUnsubscribe=null; }
+  await signOut(auth);
+  currentUser=null; currentGroup=null; groupMembers=[];
+  showScreen('auth-screen');
+};
+
+// ── ON AUTH STATE ─────────────────────────────────────────────
+onAuthStateChanged(auth, async (fbUser) => {
+  hideLoading();
+  if(!fbUser){ showScreen('auth-screen'); return; }
+  // Load profile
+  const snap = await getDoc(doc(db,'users',fbUser.uid));
+  if(!snap.exists()){ showScreen('auth-screen'); return; }
+  currentUser = { ...snap.data() };
+  showGroupScreen();
+});
+
+// ── GROUPS ────────────────────────────────────────────────────
+function genCode(){
+  const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let r='';for(let i=0;i<6;i++)r+=c[Math.floor(Math.random()*c.length)];return r;
+}
+
+async function showGroupScreen(){
+  showScreen('group-screen');
+  document.getElementById('group-welcome').textContent=`Hola, ${currentUser.nombre}! 👋`;
+  await renderMyGroups();
+}
+
+async function renderMyGroups(){
   const list=document.getElementById('my-groups-list');
-  const my=getMyGroups();
-  if(!my.length){list.innerHTML='<div style="color:var(--mu);font-size:14px;text-align:center;padding:12px">Todavía no estás en ningún grupo</div>';return}
-  list.innerHTML=my.map(g=>`<div class="group-item" onclick="enterGroup('${g.id}')"><div><div class="group-item-name">${g.name}</div><div class="group-item-meta">Código: <b style="color:var(--yw)">${g.code}</b> · ${g.members.length} jugador(es)</div></div><span class="group-item-arrow">›</span></div>`).join('');
+  list.innerHTML='<div style="color:var(--mu);font-size:14px;text-align:center;padding:12px">Cargando...</div>';
+  try {
+    const q = query(collection(db,'groups'), where('members','array-contains',currentUser.uid));
+    const snap = await getDocs(q);
+    const groups = snap.docs.map(d=>d.data());
+    if(!groups.length){
+      list.innerHTML='<div style="color:var(--mu);font-size:14px;text-align:center;padding:12px">Todavía no estás en ningún grupo</div>';
+      return;
+    }
+    list.innerHTML=groups.map(g=>`
+      <div class="group-item" onclick="enterGroup('${g.id}')">
+        <div>
+          <div class="group-item-name">${g.name}</div>
+          <div class="group-item-meta">Código: <b style="color:var(--yw)">${g.code}</b> · ${g.members.length} jugador(es)</div>
+        </div>
+        <span class="group-item-arrow">›</span>
+      </div>`).join('');
+  } catch(e){ list.innerHTML='<div style="color:#ff4d4d;font-size:14px;padding:12px">Error al cargar grupos</div>'; }
 }
 
-function createGroup(){
+window.createGroup = async function(){
   const name=v('new-group-name');
-  if(!name){showToast('Ingresá un nombre');return}
-  const groups=getGroups(),id='g_'+Date.now(),code=genCode();
-  groups[id]={id,name,code,members:[currentUser.uid],createdAt:Date.now(),history:[]};
-  saveGroups(groups);document.getElementById('new-group-name').value='';enterGroup(id);
-}
-function joinGroup(){
+  if(!name){ showToast('Ingresá un nombre'); return; }
+  const id='g_'+Date.now(), code=genCode();
+  await setDoc(doc(db,'groups',id),{ id, name, code, members:[currentUser.uid], createdAt:Date.now(), history:[] });
+  document.getElementById('new-group-name').value='';
+  showToast('✓ Grupo creado!');
+  await enterGroup(id);
+};
+
+window.joinGroup = async function(){
   const code=v('join-code').toUpperCase();
-  if(code.length!==6){showToast('El código debe tener 6 caracteres');return}
-  const groups=getGroups(),group=Object.values(groups).find(g=>g.code===code);
-  if(!group){showToast('Código incorrecto');return}
-  if(!group.members.includes(currentUser.uid))group.members.push(currentUser.uid);
-  saveGroups(groups);document.getElementById('join-code').value='';enterGroup(group.id);
+  if(code.length!==6){ showToast('El código debe tener 6 caracteres'); return; }
+  const q=query(collection(db,'groups'),where('code','==',code));
+  const snap=await getDocs(q);
+  if(snap.empty){ showToast('Código incorrecto'); return; }
+  const gDoc=snap.docs[0];
+  const g=gDoc.data();
+  if(!g.members.includes(currentUser.uid)){
+    await updateDoc(doc(db,'groups',g.id),{ members: arrayUnion(currentUser.uid) });
+  }
+  document.getElementById('join-code').value='';
+  showToast('✓ Te uniste al grupo!');
+  await enterGroup(g.id);
+};
+
+window.enterGroup = async function(id){
+  const snap=await getDoc(doc(db,'groups',id));
+  if(!snap.exists()) return;
+  currentGroup=snap.data();
+  // Load members
+  await loadGroupMembers();
+  showMain();
+};
+
+window.leaveGroupUI = function(){
+  if(groupUnsubscribe){ groupUnsubscribe(); groupUnsubscribe=null; }
+  currentGroup=null; groupMembers=[];
+  showGroupScreen();
+};
+
+async function loadGroupMembers(){
+  if(!currentGroup) return;
+  const promises = currentGroup.members.map(uid=>getDoc(doc(db,'users',uid)));
+  const snaps = await Promise.all(promises);
+  groupMembers = snaps.filter(s=>s.exists()).map(s=>s.data());
 }
-function enterGroup(id){const g=getGroups()[id];currentGroup=g;DB.set('currentGroup',g);showMain()}
-function leaveGroupUI(){currentGroup=null;DB.del('currentGroup');showGroupScreen()}
 
-function getRatings(){return DB.get('ratings',{})}
-function saveRatings(r){DB.set('ratings',r)}
-
-function getPlayerStats(uid,gid){
-  const gr=(getRatings()[gid]||{})[uid]||{};
-  const stats={};
-  SKILLS.forEach(s=>{const vals=Object.values(gr).map(r=>r[s]).filter(v=>v!=null);stats[s]=vals.length?Math.round(vals.reduce((a,b)=>a+b,0)/vals.length):0});
-  return{stats,overall:Math.round(Object.values(stats).reduce((a,b)=>a+b,0)/SKILLS.length)||0};
+// ── RATINGS ───────────────────────────────────────────────────
+async function getPlayerStats(uid){
+  try {
+    const snap=await getDoc(doc(db,'ratings',currentGroup.id+'_'+uid));
+    if(!snap.exists()) return {stats:{},overall:0};
+    const data=snap.data();
+    const stats={};
+    SKILLS.forEach(s=>{
+      const vals=Object.values(data.ratings||{}).map(r=>r[s]).filter(v=>v!=null);
+      stats[s]=vals.length?Math.round(vals.reduce((a,b)=>a+b,0)/vals.length):0;
+    });
+    const overall=Math.round(Object.values(stats).reduce((a,b)=>a+b,0)/SKILLS.length)||0;
+    return {stats, overall};
+  } catch{ return {stats:{},overall:0}; }
 }
 
-function saveRating(uid,skillRatings){
-  if(uid===currentUser.uid){showToast('No podés calificarte a vos mismo');return}
-  const r=getRatings();
-  if(!r[currentGroup.id])r[currentGroup.id]={};
-  if(!r[currentGroup.id][uid])r[currentGroup.id][uid]={};
-  r[currentGroup.id][uid][currentUser.uid]=skillRatings;
-  saveRatings(r);
+// Cache para no consultar Firebase en cada render
+const statsCache = {};
+async function getCachedStats(uid){
+  if(!statsCache[uid]){ statsCache[uid]=await getPlayerStats(uid); }
+  return statsCache[uid];
+}
+function invalidateCache(uid){ delete statsCache[uid]; }
+
+async function saveRating(targetUid, skillRatings){
+  if(targetUid===currentUser.uid){ showToast('No podés calificarte a vos mismo'); return; }
+  const ref=doc(db,'ratings',currentGroup.id+'_'+targetUid);
+  const snap=await getDoc(ref);
+  const existing=snap.exists()?snap.data():{ratings:{}};
+  existing.ratings[currentUser.uid]=skillRatings;
+  await setDoc(ref, existing);
+  invalidateCache(targetUid);
 }
 
-function getUser(uid){return Object.values(DB.get('users',{})).find(u=>u.uid===uid)||null}
-function getGroupMembers(){
-  if(!currentGroup)return[];
-  const g=getGroups()[currentGroup.id];
-  return g?(g.members.map(uid=>getUser(uid)).filter(Boolean)):[];
+// ── ATTENDANCE ────────────────────────────────────────────────
+async function getAttendance(){
+  try {
+    const snap=await getDoc(doc(db,'attendance',currentGroup.id));
+    return snap.exists()?snap.data():{};
+  } catch{ return {}; }
+}
+async function setAttendance(uid, confirmed){
+  const ref=doc(db,'attendance',currentGroup.id);
+  await setDoc(ref,{[uid]:confirmed},{merge:true});
 }
 
-function getAttendance(){return(DB.get('attendance',{})[currentGroup.id])||{}}
-function setAttendance(uid,confirmed){const a=DB.get('attendance',{});if(!a[currentGroup.id])a[currentGroup.id]={};a[currentGroup.id][uid]=confirmed;DB.set('attendance',a)}
-function getConfirmedPlayers(){const att=getAttendance();return getGroupMembers().filter(u=>att[u.uid])}
+// ── APP FLOW ──────────────────────────────────────────────────
+function showMain(){
+  showScreen('main-screen');
+  showTab(currentTab||'jugadores');
+}
 
 function showTab(tab){
   currentTab=tab;
   document.querySelectorAll('.tab-item').forEach(el=>el.classList.remove('active'));
   const tabEl=document.getElementById('tab-'+tab);
-  if(tabEl)tabEl.classList.add('active');
+  if(tabEl) tabEl.classList.add('active');
   const content=document.getElementById('main-content');
+  content.innerHTML='<div class="empty-state"><div class="spinner" style="margin:0 auto"></div></div>';
   ({jugadores:renderJugadores,asistencia:renderAsistencia,equipos:renderEquipos,calificar:renderCalificar,historial:renderHistorial}[tab]||(() => {}))(content);
 }
+window.showTab=showTab;
 
-function renderJugadores(el){
-  const members=getGroupMembers(),att=getAttendance(),g=getGroups()[currentGroup.id];
+// ── JUGADORES ─────────────────────────────────────────────────
+async function renderJugadores(el){
+  const att=await getAttendance();
+  const g=currentGroup;
+  // Pre-fetch all stats
+  const statsMap={};
+  await Promise.all(groupMembers.map(async u=>{ statsMap[u.uid]=await getCachedStats(u.uid); }));
+
   el.innerHTML=`
     <div class="page-header">
-      <div><div class="page-title">Jugadores</div><div class="page-subtitle">${members.length} en el grupo</div></div>
-      <div class="user-pill" onclick="showGroupOptions()">
+      <div><div class="page-title">Jugadores</div><div class="page-subtitle">${groupMembers.length} en el grupo</div></div>
+      <div class="user-pill" onclick="copyCode('${g.code}')">
         <div class="user-pill-avatar">${currentUser.nombre[0]}${currentUser.apellido[0]}</div>
-        <div class="user-pill-name">${g?g.name:''}</div>
+        <div class="user-pill-name">${g.name}</div>
       </div>
     </div>
     <div class="group-header">
-      <div><div class="group-header-name">${g?g.name:''}</div><div style="font-size:12px;color:var(--mu)">Código para invitar</div></div>
-      <div class="group-header-code" onclick="copyCode('${g?g.code:''}')">${g?g.code:''} 📋</div>
+      <div><div class="group-header-name">${g.name}</div><div style="font-size:12px;color:var(--mu)">Código para invitar</div></div>
+      <div class="group-header-code" onclick="copyCode('${g.code}')">${g.code} 📋</div>
     </div>
-    <div class="players-grid">${members.map(u=>renderPlayerCard(u,att)).join('')}</div>
+    <div class="players-grid">
+      ${groupMembers.map(u=>{
+        const {overall}=statsMap[u.uid]||{overall:0};
+        const pie={derecho:'D',zurdo:'Z',ambos:'A'}[u.pie]||'?';
+        const col=overallColor(overall);
+        return `<div class="player-card" onclick="openPlayerDetail('${u.uid}')">
+          <span class="player-card-foot">${pie}</span>
+          ${att[u.uid]?'<span class="confirmed-dot"></span>':''}
+          <div class="player-card-overall" style="color:${col}">${overall||'—'}</div>
+          <div class="player-card-pos">JUGADOR</div>
+          <div class="player-card-name">${u.nombre}<br>${u.apellido}</div>
+          <div class="player-card-sub">${u.edad} años</div>
+        </div>`;
+      }).join('')}
+    </div>
     <div style="margin-top:16px"><button class="btn-secondary" onclick="leaveGroupUI()">← Cambiar de grupo</button></div>`;
 }
 
-function overallColor(v){return v>=80?'var(--yw)':v>=60?'var(--gr)':'var(--or)'}
-
-function renderPlayerCard(u,att){
-  const{overall}=getPlayerStats(u.uid,currentGroup.id);
-  const pie={derecho:'D',zurdo:'Z',ambos:'A'}[u.pie]||'?';
-  return`<div class="player-card" onclick="openPlayerDetail('${u.uid}')">
-    <span class="player-card-foot">${pie}</span>
-    ${att[u.uid]?'<span class="confirmed-dot"></span>':''}
-    <div class="player-card-overall" style="color:${overallColor(overall)}">${overall||'—'}</div>
-    <div class="player-card-pos">JUGADOR</div>
-    <div class="player-card-name">${u.nombre}<br>${u.apellido}</div>
-    <div class="player-card-sub">${u.edad} años</div>
-  </div>`;
-}
-
-function openPlayerDetail(uid){
-  const u=getUser(uid);if(!u)return;
-  const{stats,overall}=getPlayerStats(uid,currentGroup.id);
-  const raterCount=Object.keys((getRatings()[currentGroup.id]||{})[uid]||{}).length;
+window.openPlayerDetail = async function(uid){
+  const u=groupMembers.find(m=>m.uid===uid); if(!u) return;
+  const {stats,overall}=await getCachedStats(uid);
+  const ratingSnap=await getDoc(doc(db,'ratings',currentGroup.id+'_'+uid));
+  const raterCount=ratingSnap.exists()?Object.keys(ratingSnap.data().ratings||{}).length:0;
   const isSelf=uid===currentUser.uid;
   const col=overallColor(overall);
   const pieLabel={derecho:'🦶 Derecho',zurdo:'🦶 Zurdo',ambos:'🦶 Ambos'}[u.pie]||u.pie;
@@ -482,25 +621,34 @@ function openPlayerDetail(uid){
       <div style="font-family:'Bebas Neue',sans-serif;font-size:64px;color:${col};line-height:1;text-shadow:0 0 30px ${col}40">${overall||'—'}</div>
       <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:2px">${u.nombre} ${u.apellido}</div>
       <div style="color:var(--mu);font-size:13px;margin-top:4px">${u.edad} años · ${pieLabel}</div>
-      <div style="margin-top:8px"><span class="chip chip-blue">${raterCount} calificación(es)</span>${isSelf?'<span class="chip chip-orange" style="margin-left:6px">Vos</span>':''}</div>
+      <div style="margin-top:8px">
+        <span class="chip chip-blue">${raterCount} calificación(es)</span>
+        ${isSelf?'<span class="chip chip-orange" style="margin-left:6px">Vos</span>':''}
+      </div>
     </div>
-    ${SKILLS.map(skill=>{const v=stats[skill]||0;const cls=v>=80?'elite':v>=60?'good':'avg';return`<div class="stat-bar-row"><div class="stat-bar-label">${skill}</div><div class="stat-bar-track"><div class="stat-bar-fill ${cls}" style="width:${v}%"></div></div><div class="stat-bar-val">${v||'—'}</div></div>`}).join('')}
+    ${SKILLS.map(skill=>{const vv=stats[skill]||0;const cls=vv>=80?'elite':vv>=60?'good':'avg';return`<div class="stat-bar-row"><div class="stat-bar-label">${skill}</div><div class="stat-bar-track"><div class="stat-bar-fill ${cls}" style="width:${vv}%"></div></div><div class="stat-bar-val">${vv||'—'}</div></div>`}).join('')}
     ${!isSelf?`<button class="btn-primary" style="margin-top:20px" onclick="closeModal('player-modal');showTab('calificar');pendingRateUid='${uid}'">CALIFICAR A ${u.nombre.toUpperCase()}</button>`:''}`;
   openModal('player-modal');
-}
+};
 
-function copyCode(code){navigator.clipboard?navigator.clipboard.writeText(code).then(()=>showToast('Código copiado: '+code)):showToast('Código: '+code)}
-function showGroupOptions(){showToast('Código: '+(getGroups()[currentGroup.id]||{}).code)}
+window.copyCode=function(code){
+  navigator.clipboard?navigator.clipboard.writeText(code).then(()=>showToast('Código copiado: '+code)):showToast('Código: '+code);
+};
 
-function renderAsistencia(el){
-  const members=getGroupMembers(),att=getAttendance(),confirmed=members.filter(u=>att[u.uid]);
+// ── ASISTENCIA ────────────────────────────────────────────────
+async function renderAsistencia(el){
+  const att=await getAttendance();
+  const confirmed=groupMembers.filter(u=>att[u.uid]);
+  const statsMap={};
+  await Promise.all(groupMembers.map(async u=>{ statsMap[u.uid]=await getCachedStats(u.uid); }));
+
   el.innerHTML=`
     <div class="page-header"><div><div class="page-title">Asistencia</div><div class="page-subtitle">Próximo partido del lunes</div></div></div>
-    <div class="confirmed-count"><div class="count">${confirmed.length}</div><div class="label">confirmados de ${members.length}</div></div>
+    <div class="confirmed-count"><div class="count">${confirmed.length}</div><div class="label">confirmados de ${groupMembers.length}</div></div>
     <div class="section-title">Lista de jugadores</div>
-    <div class="attendance-list">${members.map(u=>{
-      const isConfirmed=att[u.uid],isSelf=u.uid===currentUser.uid;
-      const{overall}=getPlayerStats(u.uid,currentGroup.id);
+    <div class="attendance-list">${groupMembers.map(u=>{
+      const isConfirmed=att[u.uid], isSelf=u.uid===currentUser.uid;
+      const {overall}=statsMap[u.uid]||{overall:0};
       const btnClass=isSelf?(isConfirmed?'mine':'absent mine'):(isConfirmed?'confirmed':'absent');
       const btnText=isSelf?(isConfirmed?'✓ Voy':'Confirmar'):(isConfirmed?'✓ Va':'No confirma');
       return`<div class="attendance-item">
@@ -513,16 +661,21 @@ function renderAsistencia(el){
     }).join('')}</div>`;
 }
 
-function toggleMyAttendance(){
-  const cur=(getAttendance())[currentUser.uid]||false;
-  setAttendance(currentUser.uid,!cur);
+window.toggleMyAttendance = async function(){
+  const att=await getAttendance();
+  const cur=att[currentUser.uid]||false;
+  await setAttendance(currentUser.uid,!cur);
   showToast(!cur?'✓ Confirmaste tu asistencia!':'Cancelaste tu asistencia');
   showTab('asistencia');
-}
+};
 
+// ── EQUIPOS ───────────────────────────────────────────────────
 let currentTeams=null;
-function renderEquipos(el){
-  const n=getConfirmedPlayers().length;
+
+async function renderEquipos(el){
+  const att=await getAttendance();
+  const confirmed=groupMembers.filter(u=>att[u.uid]);
+  const n=confirmed.length;
   el.innerHTML=`
     <div class="page-header"><div><div class="page-title">Equipos</div><div class="page-subtitle">Sorteo balanceado</div></div></div>
     <div class="confirmed-count"><div class="count">${n}</div><div class="label">confirmados para jugar</div></div>
@@ -532,43 +685,58 @@ function renderEquipos(el){
 }
 
 function renderTeamsResult(){
-  if(!currentTeams)return'';
+  if(!currentTeams) return'';
   return`<div class="teams-container">${currentTeams.map((team,idx)=>`
     <div class="team-card" style="border-color:${idx===0?'var(--ac)':'var(--ac2)'}30">
       <div class="team-header">
         <div class="team-name" style="color:${idx===0?'var(--ac)':'var(--ac2)'}">${idx===0?'⚡ EQUIPO A':'🔥 EQUIPO B'}</div>
         <div class="team-overall">${team.avg}</div>
       </div>
-      ${team.players.map((u,i)=>`<div class="team-player"><div class="team-player-num">${i+1}</div><div class="team-player-name">${u.nombre} ${u.apellido[0]}.</div><div class="team-player-ovr">${getPlayerStats(u.uid,currentGroup.id).overall||'—'}</div></div>`).join('')}
+      ${team.players.map((u,i)=>`<div class="team-player"><div class="team-player-num">${i+1}</div><div class="team-player-name">${u.nombre} ${u.apellido[0]}.</div><div class="team-player-ovr">${u.ovr||'—'}</div></div>`).join('')}
     </div>`).join('')}</div>
     <button class="redraw-btn" style="margin-top:12px" onclick="drawTeams()">🔄 VOLVER A SORTEAR</button>
     <button class="btn-primary" style="margin-top:8px" onclick="saveMatch()">💾 GUARDAR PARTIDO</button>`;
 }
 
-function drawTeams(){
-  const confirmed=getConfirmedPlayers();
-  if(confirmed.length<4){showToast('No hay suficientes jugadores');return}
-  const sorted=confirmed.map(u=>({...u,ovr:getPlayerStats(u.uid,currentGroup.id).overall||0})).sort((a,b)=>b.ovr-a.ovr);
+window.drawTeams = async function(){
+  const att=await getAttendance();
+  const confirmed=groupMembers.filter(u=>att[u.uid]);
+  if(confirmed.length<4){ showToast('No hay suficientes jugadores'); return; }
+  const withOvr=await Promise.all(confirmed.map(async u=>({...u,ovr:(await getCachedStats(u.uid)).overall||0})));
+  withOvr.sort((a,b)=>b.ovr-a.ovr);
   const teams=[[],[]];
-  sorted.forEach((p,i)=>{const round=Math.floor(i/2),inRound=i%2,team=round%2===0?inRound:1-inRound;teams[team].push(p)});
+  withOvr.forEach((p,i)=>{const round=Math.floor(i/2),inRound=i%2,team=round%2===0?inRound:1-inRound;teams[team].push(p)});
   teams.forEach(t=>{for(let i=t.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[t[i],t[j]]=[t[j],t[i]]}});
   currentTeams=teams.map(t=>({players:t,avg:Math.round(t.reduce((s,p)=>s+p.ovr,0)/t.length)||0}));
   showTab('equipos');
-}
+};
 
-function saveMatch(){
-  if(!currentTeams)return;
-  const groups=getGroups(),g=groups[currentGroup.id];
-  if(!g.history)g.history=[];
-  g.history.unshift({date:new Date().toLocaleDateString('es-AR',{weekday:'long',day:'numeric',month:'long'}),timestamp:Date.now(),teams:currentTeams.map(t=>({avg:t.avg,players:t.players.map(p=>({uid:p.uid,nombre:p.nombre,apellido:p.apellido,ovr:p.ovr}))}))});
-  saveGroups(groups);currentGroup=g;DB.set('currentGroup',g);showToast('✓ Partido guardado!');currentTeams=null;
-}
+window.saveMatch = async function(){
+  if(!currentTeams) return;
+  const ref=doc(db,'groups',currentGroup.id);
+  const snap=await getDoc(ref);
+  const g=snap.data();
+  const history=g.history||[];
+  history.unshift({
+    date:new Date().toLocaleDateString('es-AR',{weekday:'long',day:'numeric',month:'long'}),
+    timestamp:Date.now(),
+    teams:currentTeams.map(t=>({avg:t.avg,players:t.players.map(p=>({uid:p.uid,nombre:p.nombre,apellido:p.apellido,ovr:p.ovr}))}))
+  });
+  await updateDoc(ref,{history});
+  currentGroup={...currentGroup,history};
+  showToast('✓ Partido guardado!');
+  currentTeams=null;
+};
 
-let pendingRateUid=null,rateSliders={};
+// ── CALIFICAR ─────────────────────────────────────────────────
+let pendingRateUid=null, rateSliders={};
 
-function renderCalificar(el){
-  const members=getGroupMembers().filter(u=>u.uid!==currentUser.uid);
-  if(!members.length){el.innerHTML='<div class="page-header"><div class="page-title">Calificar</div></div><div class="empty-state"><div class="icon">👥</div><div class="msg">No hay compañeros para calificar</div></div>';return}
+async function renderCalificar(el){
+  const members=groupMembers.filter(u=>u.uid!==currentUser.uid);
+  if(!members.length){
+    el.innerHTML='<div class="page-header"><div class="page-title">Calificar</div></div><div class="empty-state"><div class="icon">👥</div><div class="msg">No hay compañeros para calificar</div></div>';
+    return;
+  }
   const selectedUid=pendingRateUid&&members.find(u=>u.uid===pendingRateUid)?pendingRateUid:members[0].uid;
   pendingRateUid=null;
   el.innerHTML=`
@@ -579,48 +747,57 @@ function renderCalificar(el){
       </select>
     </div>
     <div id="rate-form-container"></div>`;
-  buildRateForm(selectedUid);
+  await buildRateForm(selectedUid);
 }
 
-function selectRatePlayer(uid){buildRateForm(uid)}
+window.selectRatePlayer = async function(uid){ await buildRateForm(uid); };
 
-function buildRateForm(uid){
-  const u=getUser(uid);if(!u)return;
-  const{stats}=getPlayerStats(uid,currentGroup.id);
-  const myPrev=(getRatings()[currentGroup.id]?.[uid]?.[currentUser.uid])||{};
+async function buildRateForm(uid){
+  const u=groupMembers.find(m=>m.uid===uid); if(!u) return;
+  const {stats}=await getCachedStats(uid);
+  const rSnap=await getDoc(doc(db,'ratings',currentGroup.id+'_'+uid));
+  const myPrev=rSnap.exists()?((rSnap.data().ratings||{})[currentUser.uid]||{}):{};
   rateSliders={};
-  SKILLS.forEach(s=>{rateSliders[s]=myPrev[s]??stats[s]??50});
-  const container=document.getElementById('rate-form-container');
-  if(!container)return;
+  SKILLS.forEach(s=>{ rateSliders[s]=myPrev[s]??stats[s]??50; });
+  const container=document.getElementById('rate-form-container'); if(!container) return;
   container.innerHTML=`
     <div class="rate-player-header">
       <div class="rate-avatar">${u.nombre[0]}${u.apellido[0]}</div>
       <div><div class="rate-name">${u.nombre} ${u.apellido}</div><div class="rate-sub">${u.edad} años · ${u.pie}</div></div>
     </div>
-    ${SKILLS.map(skill=>{const v=rateSliders[skill];const col=overallColor(v);return`<div class="slider-group"><div class="slider-header"><div class="slider-label">${skill}</div><div class="slider-value" id="sv_${skill}" style="color:${col}">${v}</div></div><input type="range" class="slider-input" min="0" max="100" value="${v}" oninput="updateSlider('${uid}','${skill}',this.value)"></div>`}).join('')}
+    ${SKILLS.map(skill=>{const vv=rateSliders[skill];const col=overallColor(vv);return`<div class="slider-group"><div class="slider-header"><div class="slider-label">${skill}</div><div class="slider-value" id="sv_${skill}" style="color:${col}">${vv}</div></div><input type="range" class="slider-input" min="0" max="100" value="${vv}" oninput="updateSlider('${uid}','${skill}',this.value)"></div>`}).join('')}
     <button class="btn-primary" onclick="submitRating('${uid}')">✓ GUARDAR CALIFICACIÓN</button>`;
 }
 
-function updateSlider(uid,skill,val){
-  val=parseInt(val);rateSliders[skill]=val;
+window.updateSlider = function(uid,skill,val){
+  val=parseInt(val); rateSliders[skill]=val;
   const el=document.getElementById('sv_'+skill);
-  if(el){el.textContent=val;el.style.color=overallColor(val)}
-}
-function submitRating(uid){saveRating(uid,{...rateSliders});showToast('✓ Calificación guardada!');showTab('jugadores')}
+  if(el){el.textContent=val;el.style.color=overallColor(val);}
+};
 
-function renderHistorial(el){
-  const groups=getGroups(),g=groups[currentGroup.id],history=(g&&g.history)||[];
-  const members=getGroupMembers();
-  const raterCount=Object.keys(((getRatings()[currentGroup.id]||{})[currentUser.uid])||{}).length;
-  const{overall}=getPlayerStats(currentUser.uid,currentGroup.id);
+window.submitRating = async function(uid){
+  await saveRating(uid,{...rateSliders});
+  showToast('✓ Calificación guardada!');
+  showTab('jugadores');
+};
+
+// ── HISTORIAL ─────────────────────────────────────────────────
+async function renderHistorial(el){
+  const snap=await getDoc(doc(db,'groups',currentGroup.id));
+  const g=snap.data();
+  const history=g.history||[];
+  const {overall}=await getCachedStats(currentUser.uid);
+  const rSnap=await getDoc(doc(db,'ratings',currentGroup.id+'_'+currentUser.uid));
+  const raterCount=rSnap.exists()?Object.keys(rSnap.data().ratings||{}).length:0;
+
   el.innerHTML=`
-    <div class="page-header"><div><div class="page-title">Historial</div><div class="page-subtitle">Tu rendimiento en ${g?g.name:''}</div></div></div>
+    <div class="page-header"><div><div class="page-title">Historial</div><div class="page-subtitle">Tu rendimiento en ${g.name}</div></div></div>
     <div class="section-title">Mis stats</div>
     <div class="stats-grid">
       <div class="stat-card"><div class="val">${overall||'—'}</div><div class="lbl">Overall</div></div>
       <div class="stat-card"><div class="val">${raterCount}</div><div class="lbl">Me calificaron</div></div>
       <div class="stat-card"><div class="val">${history.length}</div><div class="lbl">Partidos</div></div>
-      <div class="stat-card"><div class="val">${members.length}</div><div class="lbl">Jugadores</div></div>
+      <div class="stat-card"><div class="val">${groupMembers.length}</div><div class="lbl">Jugadores</div></div>
     </div>
     <div class="section-title">Partidos jugados</div>
     ${history.length
@@ -628,9 +805,24 @@ function renderHistorial(el){
       :'<div class="empty-state"><div class="icon">📋</div><div class="msg">Todavía no hay partidos guardados</div></div>'}`;
 }
 
-window.addEventListener('DOMContentLoaded',()=>{
-  currentUser?(currentGroup?showMain():showGroupScreen()):showScreen('auth-screen');
-});
+// Expose needed globals
+window.drawTeams=window.drawTeams;
+window.saveMatch=window.saveMatch;
+window.submitRating=window.submitRating;
+window.toggleMyAttendance=window.toggleMyAttendance;
+window.leaveGroupUI=window.leaveGroupUI;
+window.enterGroup=window.enterGroup;
+window.createGroup=window.createGroup;
+window.joinGroup=window.joinGroup;
+window.doLogout=window.doLogout;
+window.doLogin=window.doLogin;
+window.doRegister=window.doRegister;
+window.openPlayerDetail=window.openPlayerDetail;
+window.copyCode=window.copyCode;
+window.switchAuthTab=window.switchAuthTab;
+window.updateSlider=window.updateSlider;
+window.selectRatePlayer=window.selectRatePlayer;
+
 </script>
 </body>
 </html>
