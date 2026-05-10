@@ -912,15 +912,64 @@ canvas.radar-canvas{display:block;margin:0 auto}
   font-size:11px;color:var(--gold);font-weight:600;
 }
 
-/* ── STATS GRID ── */
-.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
-@media(min-width:400px){.stats-grid{grid-template-columns:repeat(4,1fr)}}
+/* ── STATS PROFILE HERO ── */
+.stats-hero{
+  background:var(--sf2);border:1px solid var(--br);border-radius:18px;
+  padding:20px;margin-bottom:14px;
+  position:relative;overflow:hidden;
+}
+.stats-hero::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--purple),var(--cyan),var(--purple));
+  background-size:200% 100%;
+  animation:shimmerBar 3s ease infinite;
+}
+.stats-hero-top{display:flex;align-items:center;gap:16px;margin-bottom:16px}
+.stats-hero-avatar{
+  width:64px;height:64px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Bebas Neue',sans-serif;font-size:26px;color:#000;
+  box-shadow:0 6px 20px rgba(0,0,0,.4),0 0 0 2px rgba(255,255,255,.07);
+}
+.stats-hero-info{flex:1}
+.stats-hero-name{
+  font-family:'Barlow Condensed',sans-serif;font-size:22px;
+  font-weight:800;letter-spacing:1.5px;text-transform:uppercase;
+}
+.stats-hero-meta{font-size:12px;color:var(--tx3);margin-top:3px}
+.stats-hero-overall{
+  font-family:'Bebas Neue',sans-serif;font-size:72px;line-height:1;
+  flex-shrink:0;
+}
+
+/* Skill bars inside stats hero */
+.stats-skill-bars{display:flex;flex-direction:column;gap:7px}
+.stats-skill-row{display:flex;align-items:center;gap:8px}
+.stats-skill-name{
+  font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;
+  color:var(--tx3);width:70px;flex-shrink:0;
+}
+.stats-skill-track{
+  flex:1;height:5px;background:rgba(255,255,255,.07);
+  border-radius:3px;overflow:hidden;
+}
+.stats-skill-fill{
+  height:100%;border-radius:3px;
+  transition:width .7s cubic-bezier(.4,0,.2,1);
+}
+.stats-skill-val{
+  font-family:'Bebas Neue',sans-serif;font-size:15px;
+  min-width:24px;text-align:right;
+}
+
+/* ── STATS GRID (compact numbers) ── */
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
 .stat-card{
   background:var(--sf2);border:1px solid var(--br);border-radius:12px;
-  padding:14px;text-align:center;
+  padding:12px 8px;text-align:center;
 }
-.stat-card .val{font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--cyan)}
-.stat-card .lbl{font-size:10px;color:var(--tx3);text-transform:uppercase;letter-spacing:1px;margin-top:2px}
+.stat-card .val{font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--cyan)}
+.stat-card .lbl{font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:1px;margin-top:2px}
 
 /* ══════════════════════════════════════════════════════
    SOCIAL FEED
@@ -2323,13 +2372,20 @@ async function renderHistorial(el){
   const snap = await getDoc(doc(db,'groups', currentGroup.id));
   const g = snap.data();
   const history = g.history||[];
-  const {overall} = await getCachedStats(currentUser.uid);
+  const {overall, stats} = await getCachedStats(currentUser.uid);
   const rSnap = await getDoc(doc(db,'ratings', currentGroup.id+'_'+currentUser.uid));
   const raterCount = rSnap.exists() ? Object.keys(rSnap.data().ratings||{}).length : 0;
   const eloRank = getEloRank(currentUser.elo||1000);
-
-  // Personal match count
   const myMatches = history.filter(m=>m.teams?.some(t=>t.players?.some(p=>p.uid===currentUser.uid))).length;
+  const myWins   = history.filter(m=>{
+    const idx = m.teams?.findIndex(t=>t.players?.some(p=>p.uid===currentUser.uid));
+    if(idx===-1||idx===undefined) return false;
+    const sA=m.scoreA||0, sB=m.scoreB||0;
+    return (idx===0&&sA>sB)||(idx===1&&sB>sA);
+  }).length;
+
+  const ovrCol = overallColor(overall);
+  const skillBarColor = v => v>=80?'var(--gold)':v>=65?'var(--green)':v>=40?'var(--cyan)':'var(--orange)';
 
   el.innerHTML = `
     <div class="page-header">
@@ -2339,24 +2395,67 @@ async function renderHistorial(el){
       </div>
     </div>
 
-    <div class="elo-display" style="margin-bottom:16px">
-      <div class="elo-left">
-        <div class="elo-icon">${eloRank.icon}</div>
-        <div>
-          <div class="elo-label">Mi ELO</div>
-          <div class="elo-number">${currentUser.elo||1000}</div>
+    <!-- ── PROFILE HERO ── -->
+    <div class="stats-hero">
+      <div class="stats-hero-top">
+        <div class="stats-hero-avatar" style="background:${avatarGradient(currentUser.uid)}">
+          ${currentUser.nombre[0]}${currentUser.apellido[0]}
         </div>
+        <div class="stats-hero-info">
+          <div class="stats-hero-name">${currentUser.nombre} ${currentUser.apellido}</div>
+          <div class="stats-hero-meta">${POSITIONS[currentUser.posicion]||'Jugador'} · ${eloRank.icon} ${eloRank.name}</div>
+          <div class="stats-hero-meta" style="margin-top:4px">
+            <span class="chip chip-purple" style="font-size:10px">ELO ${currentUser.elo||1000}</span>
+            &nbsp;<span class="chip chip-blue" style="font-size:10px">Nv.${currentUser.level||1} · ${currentUser.xp||0} XP</span>
+          </div>
+        </div>
+        <div class="stats-hero-overall" style="color:${ovrCol};filter:drop-shadow(0 0 12px ${ovrCol==='var(--gold)'?'rgba(255,214,0,.4)':ovrCol==='var(--green)'?'rgba(0,230,118,.4)':'rgba(0,212,255,.3)'})">${overall||'—'}</div>
       </div>
-      <div class="elo-rank ${eloRank.cls}">${eloRank.name}</div>
+
+      <!-- Skill bars -->
+      <div class="stats-skill-bars">
+        ${SKILLS.map(s=>{
+          const v = stats[s]||0;
+          const col = skillBarColor(v);
+          return `<div class="stats-skill-row">
+            <div class="stats-skill-name">${s}</div>
+            <div class="stats-skill-track">
+              <div class="stats-skill-fill" style="width:${v}%;background:${col}"></div>
+            </div>
+            <div class="stats-skill-val" style="color:${col}">${v||'—'}</div>
+          </div>`;
+        }).join('')}
+      </div>
     </div>
 
+    <!-- ── QUICK STATS ── -->
     <div class="stats-grid">
-      <div class="stat-card"><div class="val" style="color:${overallColor(overall)}">${overall||'—'}</div><div class="lbl">Overall</div></div>
-      <div class="stat-card"><div class="val">${raterCount}</div><div class="lbl">Calificadores</div></div>
-      <div class="stat-card"><div class="val">${myMatches}</div><div class="lbl">Partidos</div></div>
-      <div class="stat-card"><div class="val" style="color:var(--gold)">${currentUser.mvpCount||0}</div><div class="lbl">MVPs</div></div>
+      <div class="stat-card">
+        <div class="val">${myMatches}</div>
+        <div class="lbl">Partidos</div>
+      </div>
+      <div class="stat-card">
+        <div class="val" style="color:var(--green)">${myWins}</div>
+        <div class="lbl">Victorias</div>
+      </div>
+      <div class="stat-card">
+        <div class="val" style="color:var(--gold)">${currentUser.mvpCount||0}</div>
+        <div class="lbl">MVPs</div>
+      </div>
     </div>
 
+    <!-- ── XP BAR ── -->
+    <div class="xp-bar" style="margin-bottom:16px">
+      <div class="xp-bar-top">
+        <div class="xp-bar-label">⚡ Nivel ${currentUser.level||1}</div>
+        <div class="xp-bar-val">${currentUser.xp||0} / ${((currentUser.level||1)*500)} XP</div>
+      </div>
+      <div class="xp-track">
+        <div class="xp-fill" style="width:${Math.min(100,((currentUser.xp||0)%500)/5)}%"></div>
+      </div>
+    </div>
+
+    <!-- ── LOGROS ── -->
     <div class="section-title">🏅 Logros</div>
     <div class="achievements-row">
       <div class="achievement ${raterCount>=1?'unlocked':''}">
@@ -2366,6 +2465,10 @@ async function renderHistorial(el){
       <div class="achievement ${myMatches>=5?'unlocked':''}">
         <span class="achievement-icon">${myMatches>=5?'🏃':'🔒'}</span>
         <div class="achievement-name">5 Partidos</div>
+      </div>
+      <div class="achievement ${myWins>=3?'unlocked':''}">
+        <span class="achievement-icon">${myWins>=3?'🏆':'🔒'}</span>
+        <div class="achievement-name">3 Victorias</div>
       </div>
       <div class="achievement ${(currentUser.mvpCount||0)>=1?'unlocked':''}">
         <span class="achievement-icon">${(currentUser.mvpCount||0)>=1?'👑':'🔒'}</span>
@@ -2381,40 +2484,24 @@ async function renderHistorial(el){
       </div>
     </div>
 
+    <!-- ── HISTORIAL ── -->
     <div class="section-title">📅 Historial de Partidos</div>
     ${history.length
       ? [...history].reverse().map(m=>{
           const sA = m.scoreA||0, sB = m.scoreB||0;
           const myTeamIdx = m.teams?.findIndex(t=>t.players?.some(p=>p.uid===currentUser.uid));
           const iPlayed = myTeamIdx !== -1 && myTeamIdx !== undefined;
-
-          // Determine result from my perspective
           let itemCls = '', badgeHtml = '';
           if(iPlayed){
-            const iWon = (myTeamIdx===0 && sA>sB) || (myTeamIdx===1 && sB>sA);
+            const iWon = (myTeamIdx===0&&sA>sB)||(myTeamIdx===1&&sB>sA);
             const isDraw = sA===sB;
-            if(isDraw){
-              itemCls='draw';
-              badgeHtml=`<span class="history-result-badge draw">Empate</span>`;
-            } else if(iWon){
-              itemCls='win';
-              badgeHtml=`<span class="history-result-badge win">Victoria</span>`;
-            } else {
-              itemCls='loss';
-              badgeHtml=`<span class="history-result-badge loss">Derrota</span>`;
-            }
+            if(isDraw){ itemCls='draw'; badgeHtml=`<span class="history-result-badge draw">Empate</span>`; }
+            else if(iWon){ itemCls='win'; badgeHtml=`<span class="history-result-badge win">Victoria</span>`; }
+            else { itemCls='loss'; badgeHtml=`<span class="history-result-badge loss">Derrota</span>`; }
           }
-
-          // Team side classes
           const isDraw = sA===sB;
-          const getTeamCls = (i) => {
-            if(isDraw) return 'draw-side';
-            if(i===0) return sA>sB?'winner':'loser';
-            return sB>sA?'winner':'loser';
-          };
-
-          const mvpName = m.mvp ? (groupMembers.find(u=>u.uid===m.mvp)?.nombre || 'MVP') : null;
-
+          const getTeamCls = i => isDraw?'draw-side':(i===0?(sA>sB?'winner':'loser'):(sB>sA?'winner':'loser'));
+          const mvpName = m.mvp?(groupMembers.find(u=>u.uid===m.mvp)?.nombre||'MVP'):null;
           return `<div class="history-item ${itemCls}">
             <div class="history-header">
               <div class="history-date">📅 ${m.date}</div>
@@ -2438,7 +2525,7 @@ async function renderHistorial(el){
                 <div class="history-team-players">${(m.teams[1]?.players||[]).slice(0,3).map(p=>p.nombre).join(', ')}${(m.teams[1]?.players||[]).length>3?'…':''}</div>
               </div>
             </div>
-            ${(iPlayed || mvpName) ? `<div class="history-footer">
+            ${(iPlayed||mvpName)?`<div class="history-footer">
               ${iPlayed?`<span class="chip chip-blue">✓ Jugaste</span>`:''}
               ${mvpName?`<div class="history-mvp">⭐ MVP: ${mvpName}</div>`:''}
             </div>`:''}
