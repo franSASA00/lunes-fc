@@ -341,8 +341,11 @@ input,select{font-family:inherit}
 @media(min-width:400px){.players-grid{grid-template-columns:repeat(2,1fr)}}
 @media(min-width:520px){.players-grid{grid-template-columns:repeat(3,1fr)}}
 
-/* Stagger entrance animation */
-@keyframes cardIn{from{opacity:0;transform:translateY(16px) scale(.95)}to{opacity:1;transform:translateY(0) scale(1)}}
+/* Stagger entrance animation — improved */
+@keyframes cardIn{
+  from{opacity:0;transform:translateY(22px) scale(.93)}
+  to{opacity:1;transform:translateY(0) scale(1)}
+}
 .player-card{
   border-radius:18px;
   padding:0;
@@ -352,8 +355,32 @@ input,select{font-family:inherit}
   background:var(--card-bg,linear-gradient(160deg,#111d30 0%,#0d1624 60%,#090d16 100%));
   border:1px solid var(--card-border,var(--br));
   box-shadow:0 4px 20px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.04);
-  animation:cardIn .35s cubic-bezier(.22,1,.5,1) both;
+  animation:cardIn .45s cubic-bezier(.22,1,.5,1) both;
+  /* will-change for GPU composite */
+  will-change:transform,opacity;
 }
+
+/* ── Skeleton loading ── */
+@keyframes shimmerSweep{
+  0%{background-position:-200% 0}
+  100%{background-position:200% 0}
+}
+.skeleton{
+  background:linear-gradient(90deg,var(--sf2) 0%,var(--sf3) 40%,var(--sf2) 60%,var(--sf2) 100%);
+  background-size:200% 100%;
+  animation:shimmerSweep 1.4s ease infinite;
+  border-radius:8px;
+}
+.skeleton-card{
+  border-radius:18px;border:1px solid var(--br);
+  background:var(--sf);overflow:hidden;
+  animation:cardIn .35s ease both;
+}
+.skeleton-card-top{height:28px;margin:12px 12px 0;display:flex;justify-content:space-between}
+.skeleton-card-ovr{width:44px;height:44px;border-radius:10px;margin:10px auto}
+.skeleton-card-avatar{width:52px;height:52px;border-radius:50%;margin:0 auto 10px}
+.skeleton-card-name{height:12px;margin:0 12px 6px;border-radius:4px}
+.skeleton-card-skills{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin:0 12px 12px;height:32px;border-radius:6px}
 /* Tier-specific themes */
 .player-card.elite{
   --card-bg:linear-gradient(160deg,#1a1400 0%,#141000 50%,#0a0c14 100%);
@@ -666,7 +693,7 @@ canvas.radar-canvas{display:block;margin:0 auto}
 .win-prob-label{font-size:11px;font-weight:700;color:var(--tx2)}
 
 /* ══════════════════════════════════════════════════════
-   LIVE MATCH
+   LIVE MATCH v2 — Dramatic Scoreboard
 ══════════════════════════════════════════════════════ */
 .live-badge{
   display:inline-flex;align-items:center;gap:6px;
@@ -678,61 +705,183 @@ canvas.radar-canvas{display:block;margin:0 auto}
 .live-dot{width:6px;height:6px;border-radius:50%;background:var(--red);box-shadow:0 0 8px var(--red)}
 @keyframes livePulse{0%,100%{opacity:1}50%{opacity:.6}}
 
+/* ── Clock ── */
 .match-clock{
-  text-align:center;padding:24px;
-  background:var(--sf2);border-radius:16px;margin-bottom:16px;
-  border:1px solid var(--br);
+  text-align:center;padding:20px 24px 18px;
+  background:linear-gradient(180deg,rgba(255,214,0,.06) 0%,var(--sf2) 100%);
+  border-radius:16px;margin-bottom:14px;
+  border:1px solid rgba(255,214,0,.15);
+  position:relative;overflow:hidden;
+}
+.match-clock::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);
 }
 .clock-time{
-  font-family:'Bebas Neue',sans-serif;font-size:64px;letter-spacing:4px;
-  color:var(--gold);text-shadow:0 0 30px rgba(255,214,0,.3);line-height:1;
+  font-family:'Bebas Neue',sans-serif;font-size:72px;letter-spacing:6px;
+  color:var(--gold);text-shadow:0 0 40px rgba(255,214,0,.5);line-height:1;
 }
-.clock-label{font-size:11px;color:var(--tx3);letter-spacing:2px;text-transform:uppercase;margin-top:4px}
+.clock-label{font-size:10px;color:var(--tx3);letter-spacing:3px;text-transform:uppercase;margin-top:2px}
 .clock-controls{display:flex;gap:8px;justify-content:center;margin-top:14px}
 .clock-btn{
-  padding:10px 20px;border-radius:10px;font-size:13px;font-weight:700;letter-spacing:1px;
+  padding:11px 22px;border-radius:10px;font-size:13px;font-weight:700;letter-spacing:1px;
   text-transform:uppercase;transition:all .2s;
 }
-.clock-btn.start{background:linear-gradient(135deg,var(--green),#00bfa5);color:#000;box-shadow:0 4px 12px rgba(0,230,118,.25)}
+.clock-btn.start{background:linear-gradient(135deg,var(--green),#00bfa5);color:#000;box-shadow:0 4px 16px rgba(0,230,118,.3)}
+.clock-btn.start:active{transform:scale(.96)}
 .clock-btn.stop{background:rgba(255,23,68,.2);border:1px solid rgba(255,23,68,.4);color:var(--red)}
+.clock-btn.stop:active{transform:scale(.96)}
 .clock-btn.reset{background:var(--sf3);border:1px solid var(--br2);color:var(--tx2)}
 
-.score-display{
-  display:grid;grid-template-columns:1fr auto 1fr;gap:0;
-  background:var(--sf2);border-radius:16px;margin-bottom:12px;
-  border:1px solid var(--br);overflow:hidden;
+/* ── Dramatic Scoreboard ── */
+.live-scoreboard{
+  position:relative;
+  background:linear-gradient(180deg,rgba(13,20,36,1) 0%,rgba(9,13,22,1) 100%);
+  border-radius:20px;margin-bottom:14px;
+  border:1px solid var(--br2);overflow:hidden;
+  padding:0;
 }
-.score-team{padding:16px 12px;text-align:center}
-.score-team-name{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--tx3);margin-bottom:6px}
-.score-goals{font-family:'Bebas Neue',sans-serif;font-size:56px;line-height:1}
-.score-team.team-a .score-goals{color:var(--cyan)}
-.score-team.team-b .score-goals{color:var(--orange)}
-.score-divider{
-  display:flex;align-items:center;justify-content:center;padding:0 12px;
-  font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--tx3);
-  border-left:1px solid var(--br);border-right:1px solid var(--br);
+/* Top accent bar that splits cyan/orange */
+.live-scoreboard::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--cyan) 0%,var(--cyan) 49%,var(--orange) 51%,var(--orange) 100%);
+}
+.live-sb-inner{
+  display:grid;grid-template-columns:1fr 80px 1fr;align-items:center;
+  padding:24px 0 20px;
+}
+.live-sb-team{text-align:center;padding:0 8px}
+.live-sb-team-badge{
+  font-size:9px;font-weight:800;letter-spacing:2.5px;text-transform:uppercase;
+  margin-bottom:6px;opacity:.7;
+}
+.live-sb-team.side-a .live-sb-team-badge{color:var(--cyan)}
+.live-sb-team.side-b .live-sb-team-badge{color:var(--orange)}
+.live-sb-score{
+  font-family:'Bebas Neue',sans-serif;font-size:80px;line-height:1;
+  transition:transform .15s cubic-bezier(.22,1,.5,1), color .2s;
+}
+.live-sb-team.side-a .live-sb-score{color:var(--cyan);text-shadow:0 0 40px rgba(0,212,255,.4)}
+.live-sb-team.side-b .live-sb-score{color:var(--orange);text-shadow:0 0 40px rgba(255,107,0,.4)}
+/* Leading team gets bigger score */
+.live-sb-team.leading .live-sb-score{
+  font-size:96px;
+  filter:drop-shadow(0 0 16px currentColor);
+}
+.live-sb-team.trailing .live-sb-score{
+  opacity:.45;font-size:68px;
 }
 
-.goal-btn-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.live-sb-center{
+  display:flex;flex-direction:column;align-items:center;gap:4px;
+}
+.live-sb-vs{
+  font-family:'Bebas Neue',sans-serif;font-size:13px;
+  color:var(--tx3);letter-spacing:2px;
+}
+.live-sb-half{
+  font-size:9px;color:var(--tx3);letter-spacing:1px;text-transform:uppercase;
+  background:var(--sf3);border-radius:4px;padding:2px 6px;
+}
+
+/* Goal scored flash */
+@keyframes goalFlash{
+  0%{background:rgba(255,255,255,.08)}
+  40%{background:rgba(255,255,255,.18)}
+  100%{background:transparent}
+}
+.live-scoreboard.goal-flash{animation:goalFlash .4s ease}
+/* Score pop */
+@keyframes scorePop{
+  0%{transform:scale(1)}
+  30%{transform:scale(1.35)}
+  60%{transform:scale(.92)}
+  100%{transform:scale(1)}
+}
+.score-pop{animation:scorePop .4s cubic-bezier(.22,1,.5,1)}
+
+/* ── Goal Banner (full-width toast) ── */
+.goal-banner{
+  position:fixed;top:0;left:0;right:0;z-index:200;
+  padding:0 16px;
+  transform:translateY(-120%);
+  transition:transform .3s cubic-bezier(.22,1,.5,1);
+  pointer-events:none;
+}
+.goal-banner.show{transform:translateY(0)}
+.goal-banner-inner{
+  margin-top:12px;border-radius:16px;
+  padding:14px 20px;
+  display:flex;align-items:center;gap:12px;
+  backdrop-filter:blur(20px);
+  box-shadow:0 20px 60px rgba(0,0,0,.6);
+}
+.goal-banner.banner-a .goal-banner-inner{
+  background:linear-gradient(135deg,rgba(0,212,255,.25),rgba(0,119,255,.2));
+  border:1px solid rgba(0,212,255,.5);
+}
+.goal-banner.banner-b .goal-banner-inner{
+  background:linear-gradient(135deg,rgba(255,107,0,.25),rgba(204,68,0,.2));
+  border:1px solid rgba(255,107,0,.5);
+}
+.goal-banner-ball{font-size:28px;animation:bannerBall .5s cubic-bezier(.22,1,.5,1) .05s both}
+@keyframes bannerBall{from{transform:scale(0) rotate(-180deg)}to{transform:scale(1) rotate(0deg)}}
+.goal-banner-text{flex:1}
+.goal-banner-title{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:3px;line-height:1}
+.goal-banner.banner-a .goal-banner-title{color:var(--cyan)}
+.goal-banner.banner-b .goal-banner-title{color:var(--orange)}
+.goal-banner-sub{font-size:11px;color:var(--tx2);letter-spacing:1px;margin-top:1px}
+.goal-banner-score{font-family:'Bebas Neue',sans-serif;font-size:36px;color:var(--tx);opacity:.9}
+
+/* ── Goal Buttons — bigger, more tactile ── */
+.goal-btn-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:8px}
 .goal-btn{
-  padding:14px;border-radius:12px;font-size:14px;font-weight:800;letter-spacing:1px;
-  text-transform:uppercase;transition:all .2s;text-align:center;
+  padding:18px 8px;border-radius:14px;font-size:15px;font-weight:800;letter-spacing:.5px;
+  text-transform:uppercase;text-align:center;
+  position:relative;overflow:hidden;
+  transition:transform .12s, box-shadow .12s;
 }
-.goal-btn.team-a{background:rgba(0,212,255,.15);border:1px solid rgba(0,212,255,.3);color:var(--cyan)}
-.goal-btn.team-a:active{background:rgba(0,212,255,.3)}
-.goal-btn.team-b{background:rgba(255,107,0,.15);border:1px solid rgba(255,107,0,.3);color:var(--orange)}
-.goal-btn.team-b:active{background:rgba(255,107,0,.3)}
+.goal-btn::after{
+  content:'';position:absolute;inset:0;border-radius:inherit;
+  background:rgba(255,255,255,.06);opacity:0;transition:opacity .15s;
+}
+.goal-btn:active{transform:scale(.94);box-shadow:none}
+.goal-btn:active::after{opacity:1}
 
+.goal-btn.team-a{
+  background:linear-gradient(180deg,rgba(0,212,255,.2),rgba(0,119,255,.12));
+  border:1px solid rgba(0,212,255,.4);color:var(--cyan);
+  box-shadow:0 4px 20px rgba(0,212,255,.15),inset 0 1px 0 rgba(255,255,255,.06);
+}
+.goal-btn.team-b{
+  background:linear-gradient(180deg,rgba(255,107,0,.2),rgba(204,68,0,.12));
+  border:1px solid rgba(255,107,0,.4);color:var(--orange);
+  box-shadow:0 4px 20px rgba(255,107,0,.15),inset 0 1px 0 rgba(255,255,255,.06);
+}
+.goal-btn-icon{font-size:22px;display:block;margin-bottom:3px}
+.goal-btn-label{font-size:11px;letter-spacing:2px;opacity:.8}
+.goal-undo-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.goal-undo-btn{
+  padding:9px;border-radius:10px;font-size:11px;font-weight:700;letter-spacing:1px;
+  text-transform:uppercase;text-align:center;
+  background:rgba(255,23,68,.08);border:1px solid rgba(255,23,68,.2);color:rgba(255,23,68,.6);
+  transition:all .15s;
+}
+.goal-undo-btn:active{background:rgba(255,23,68,.18);color:var(--red)}
+
+/* ── Timeline ── */
 .event-timeline{margin-bottom:16px}
 .event-item{
   display:flex;align-items:center;gap:10px;
-  padding:10px;background:var(--sf2);border-radius:10px;margin-bottom:6px;
+  padding:10px 12px;background:var(--sf2);border-radius:10px;margin-bottom:6px;
   border:1px solid var(--br);
+  animation:eventIn .3s cubic-bezier(.22,1,.5,1) both;
 }
-.event-time{font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--gold);min-width:36px}
+@keyframes eventIn{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:translateX(0)}}
+.event-time{font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--gold);min-width:40px}
 .event-icon{font-size:18px}
-.event-text{font-size:13px;font-weight:600;flex:1}
-.event-team{font-size:10px;color:var(--tx3);text-transform:uppercase;letter-spacing:.5px}
+.event-text{font-size:13px;font-weight:700;flex:1}
+.event-team{font-size:10px;text-transform:uppercase;letter-spacing:.5px;margin-top:1px}
 
 /* ══════════════════════════════════════════════════════
    MVP VOTING
@@ -1029,9 +1178,45 @@ canvas.radar-canvas{display:block;margin:0 auto}
 .chip-gold{background:rgba(255,214,0,.15);color:var(--gold)}
 .chip-purple{background:rgba(124,58,237,.2);color:#b08dff}
 
-.empty-state{text-align:center;padding:48px 20px;color:var(--tx3)}
-.empty-state .icon{font-size:48px;margin-bottom:12px;display:block;filter:grayscale(1);opacity:.5}
-.empty-state .msg{font-size:15px;line-height:1.5}
+/* ── Empty States v2 — Personality ── */
+.empty-state{
+  text-align:center;padding:52px 24px 40px;color:var(--tx3);
+  display:flex;flex-direction:column;align-items:center;
+}
+/* Legacy fallback selectors */
+.empty-state .icon{font-size:52px;margin-bottom:12px;display:block;
+  filter:grayscale(0);opacity:1;animation:emptyFloat 3s ease-in-out infinite}
+.empty-state .msg{font-size:14px;line-height:1.6;max-width:240px}
+
+/* New component structure */
+.empty-icon-wrap{
+  width:80px;height:80px;border-radius:24px;
+  background:linear-gradient(135deg,var(--sf2),var(--sf3));
+  border:1px solid var(--br2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:36px;margin-bottom:16px;
+  animation:emptyFloat 3.5s ease-in-out infinite;
+  box-shadow:0 8px 32px rgba(0,0,0,.3);
+}
+@keyframes emptyFloat{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-8px)}
+}
+.empty-title{
+  font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;
+  letter-spacing:1px;text-transform:uppercase;color:var(--tx2);margin-bottom:6px;
+}
+.empty-msg{
+  font-size:13px;line-height:1.6;color:var(--tx3);max-width:240px;margin-bottom:20px;
+}
+.empty-cta{
+  padding:12px 24px;border-radius:12px;
+  background:linear-gradient(135deg,rgba(0,212,255,.15),rgba(0,119,255,.1));
+  border:1px solid rgba(0,212,255,.3);color:var(--cyan);
+  font-size:12px;font-weight:800;letter-spacing:2px;text-transform:uppercase;
+  transition:all .2s;
+}
+.empty-cta:active{transform:scale(.96);background:rgba(0,212,255,.25)}
 
 .toast{
   position:fixed;bottom:calc(var(--th) + var(--safe) + 12px);left:50%;
@@ -1668,6 +1853,26 @@ window.showTab = showTab;
    JUGADORES — Squad Screen
 ══════════════════════════════════════════════ */
 async function renderJugadores(el){
+  // Show skeleton first
+  el.innerHTML = `
+    <div class="field-bg"></div>
+    <div class="page-header">
+      <div><div class="page-title">Squad</div><div class="page-subtitle">Cargando...</div></div>
+    </div>
+    <div class="players-grid" style="margin-top:8px">
+      ${Array(4).fill(0).map((_,i)=>`
+        <div class="skeleton-card" style="animation-delay:${i*0.07}s">
+          <div class="skeleton-card-top">
+            <div class="skeleton" style="width:22px;height:22px;border-radius:50%"></div>
+            <div class="skeleton" style="width:22px;height:22px;border-radius:50%"></div>
+          </div>
+          <div class="skeleton skeleton-card-ovr"></div>
+          <div class="skeleton skeleton-card-avatar"></div>
+          <div class="skeleton skeleton-card-name"></div>
+          <div class="skeleton skeleton-card-skills"></div>
+        </div>`).join('')}
+    </div>`;
+
   const att = await getAttendance();
   const statsMap = {};
   await Promise.all(groupMembers.map(async u=>{ statsMap[u.uid]=await getCachedStats(u.uid); }));
@@ -1704,7 +1909,7 @@ async function renderJugadores(el){
       ${ranked.slice(0,3).map((u,i)=>{
         const cls=['r1','r2','r3'][i]; const medal=['🥇','🥈','🥉'][i];
         const eloRank = getEloRank(u.elo||1000);
-        return `<div class="leaderboard-item top${i+1}">
+        return `<div class="leaderboard-item top${i+1}" style="animation:cardIn .4s cubic-bezier(.22,1,.5,1) ${i*0.08}s both">
           <div class="lb-rank ${cls}">${i+1}</div>
           <div class="lb-avatar" style="background:${avatarGradient(u.uid)}">${u.nombre[0]}${u.apellido[0]}</div>
           <div class="lb-info">
@@ -1729,7 +1934,10 @@ async function renderJugadores(el){
         const skillAbbr = {Ataque:'ATK',Velocidad:'VEL',Defensa:'DEF',Precisión:'PRC',Potencia:'POT',Resistencia:'RES'};
         const skillColor = v => v>=80?'var(--gold)':v>=65?'var(--green)':v>=40?'var(--cyan)':'var(--orange)';
         const topSkills = SKILLS.slice(0,4);
-        return `<div class="player-card ${cls}" onclick="openPlayerDetail('${u.uid}')" style="animation-delay:${idx*0.05}s">
+        // Stagger: offset based on index, with a natural row stagger (row delay + column offset)
+        const row = Math.floor(idx/2), col2 = idx%2;
+        const delay = (row * 0.10 + col2 * 0.05).toFixed(2);
+        return `<div class="player-card ${cls}" onclick="openPlayerDetail('${u.uid}')" style="animation-delay:${delay}s">
           <div class="pc-top">
             <div class="pc-left">
               <span class="player-card-foot">${pie}</span>
@@ -1919,7 +2127,12 @@ async function renderEquipos(el){
       <div class="conf-hero-item"><div class="conf-hero-val">${Math.ceil(n/2)}</div><div class="conf-hero-lbl">Rival</div></div>
     </div>
     ${n<4
-      ?`<div class="empty-state"><span class="icon">⚽</span><div class="msg">Necesitás al menos 4 jugadores confirmados para sortear.</div></div>`
+      ?`<div class="empty-state">
+          <div class="empty-icon-wrap">⚽</div>
+          <div class="empty-title">Falta gente</div>
+          <div class="empty-msg">Necesitás al menos 4 jugadores confirmados para armar equipos.</div>
+          <button class="empty-cta" onclick="showTab('asistencia')">CONFIRMAR ASISTENCIA →</button>
+        </div>`
       :`<button class="draw-btn" onclick="drawTeams()">🤖 SORTEO INTELIGENTE</button>`}
     <div id="teams-result"></div>
   `;
@@ -2028,8 +2241,11 @@ function stopLiveTimer(){
 }
 
 async function renderLive(el){
-  const att = await getAttendance();
   const hasTeams = !!currentTeams;
+  const sA = liveMatch.scoreA, sB = liveMatch.scoreB;
+  const aLeads = sA > sB, bLeads = sB > sA, tied = sA === sB;
+  const sideACls = aLeads?'leading':bLeads?'trailing':'';
+  const sideBCls = bLeads?'leading':aLeads?'trailing':'';
 
   el.innerHTML = `
     <div class="page-header">
@@ -2040,7 +2256,14 @@ async function renderLive(el){
       ${liveMatch.active?'<div class="live-badge"><div class="live-dot"></div>LIVE</div>':''}
     </div>
 
-    ${!hasTeams?`<div class="empty-state"><span class="icon">⚔️</span><div class="msg">Primero sorteá los equipos en la pestaña "Match"</div></div>`:`
+    ${!hasTeams
+      ? `<div class="empty-state">
+          <div class="empty-icon-wrap">⚔️</div>
+          <div class="empty-title">Sin equipos sorteados</div>
+          <div class="empty-msg">Confirmá asistencia y sorteá equipos en la pestaña Match antes de arrancar.</div>
+          <button class="empty-cta" onclick="showTab('asistencia')">IR A MATCH DAY →</button>
+        </div>`
+      : `
     <div class="match-clock">
       <div class="clock-time" id="live-clock">${formatTimer(liveMatch.timer)}</div>
       <div class="clock-label">Tiempo de juego</div>
@@ -2050,44 +2273,87 @@ async function renderLive(el){
       </div>
     </div>
 
-    <div class="score-display">
-      <div class="score-team team-a">
-        <div class="score-team-name" style="color:var(--cyan)">Equipo A</div>
-        <div class="score-goals">${liveMatch.scoreA}</div>
-      </div>
-      <div class="score-divider">VS</div>
-      <div class="score-team team-b">
-        <div class="score-team-name" style="color:var(--orange)">Equipo B</div>
-        <div class="score-goals">${liveMatch.scoreB}</div>
+    <!-- DRAMATIC SCOREBOARD -->
+    <div class="live-scoreboard" id="live-scoreboard">
+      <div class="live-sb-inner">
+        <div class="live-sb-team side-a ${sideACls}">
+          <div class="live-sb-team-badge">⚡ Equipo A</div>
+          <div class="live-sb-score" id="sb-score-a">${sA}</div>
+        </div>
+        <div class="live-sb-center">
+          <div class="live-sb-vs">VS</div>
+          <div class="live-sb-half">${liveMatch.active?'EN JUEGO':liveMatch.timer>0?'PAUSA':'ESPERA'}</div>
+        </div>
+        <div class="live-sb-team side-b ${sideBCls}">
+          <div class="live-sb-team-badge">🔥 Equipo B</div>
+          <div class="live-sb-score" id="sb-score-b">${sB}</div>
+        </div>
       </div>
     </div>
 
+    <!-- GOAL BUTTONS -->
     <div class="goal-btn-row">
-      <button class="goal-btn team-a" onclick="addGoal(0)">⚽ GOL EQUIPO A</button>
-      <button class="goal-btn team-b" onclick="addGoal(1)">⚽ GOL EQUIPO B</button>
+      <button class="goal-btn team-a" onclick="addGoal(0)">
+        <span class="goal-btn-icon">⚽</span>
+        <span style="font-size:14px;font-weight:800">GOL A</span>
+        <div class="goal-btn-label">Equipo A</div>
+      </button>
+      <button class="goal-btn team-b" onclick="addGoal(1)">
+        <span class="goal-btn-icon">⚽</span>
+        <span style="font-size:14px;font-weight:800">GOL B</span>
+        <div class="goal-btn-label">Equipo B</div>
+      </button>
     </div>
-    <div class="goal-btn-row">
-      <button class="goal-btn team-a" style="background:rgba(255,23,68,.1);border-color:rgba(255,23,68,.3);color:var(--red)" onclick="undoGoal(0)">↺ Quitar A</button>
-      <button class="goal-btn team-b" style="background:rgba(255,23,68,.1);border-color:rgba(255,23,68,.3);color:var(--red)" onclick="undoGoal(1)">↺ Quitar B</button>
+    <div class="goal-undo-row">
+      <button class="goal-undo-btn" onclick="undoGoal(0)">↺ Quitar gol A</button>
+      <button class="goal-undo-btn" onclick="undoGoal(1)">↺ Quitar gol B</button>
     </div>
 
     <div class="section-title">📋 Timeline</div>
     <div class="event-timeline" id="live-timeline">
-      ${liveMatch.events.length===0?'<div style="color:var(--tx3);font-size:13px;text-align:center;padding:12px">Sin eventos aún</div>':''}
-      ${liveMatch.events.map(ev=>`
-        <div class="event-item">
-          <div class="event-time">${formatTimer(ev.time)}</div>
-          <div class="event-icon">${ev.icon}</div>
-          <div>
-            <div class="event-text">${ev.text}</div>
-            <div class="event-team" style="color:${ev.team===0?'var(--cyan)':'var(--orange)'}">${ev.team===0?'Equipo A':'Equipo B'}</div>
-          </div>
-        </div>`).reverse().join('')}
+      ${liveMatch.events.length===0
+        ? `<div style="color:var(--tx3);font-size:13px;text-align:center;padding:16px;opacity:.6">Sin eventos aún · los goles aparecen aquí</div>`
+        : [...liveMatch.events].reverse().map(ev=>`
+          <div class="event-item">
+            <div class="event-time">${formatTimer(ev.time)}</div>
+            <div class="event-icon">${ev.icon}</div>
+            <div>
+              <div class="event-text">${ev.text}</div>
+              <div class="event-team" style="color:${ev.team===0?'var(--cyan)':'var(--orange)'}">${ev.team===0?'Equipo A':'Equipo B'}</div>
+            </div>
+          </div>`).join('')}
     </div>
 
-    <button class="btn-primary" style="margin-top:8px" onclick="saveMatch()">💾 GUARDAR PARTIDO</button>
+    <button class="btn-primary" style="margin-top:4px;margin-bottom:16px" onclick="saveMatch()">💾 GUARDAR PARTIDO</button>
     `}
   `;
+}
+
+/* ── Goal Banner helper ── */
+function showGoalBanner(team, sA, sB){
+  // Remove any existing banner
+  const old = document.getElementById('goal-banner');
+  if(old) old.remove();
+
+  const banner = document.createElement('div');
+  banner.id = 'goal-banner';
+  banner.className = `goal-banner banner-${team===0?'a':'b'}`;
+  banner.innerHTML = `
+    <div class="goal-banner-inner">
+      <div class="goal-banner-ball">⚽</div>
+      <div class="goal-banner-text">
+        <div class="goal-banner-title">¡GOOOOL!</div>
+        <div class="goal-banner-sub">Equipo ${team===0?'A':'B'} anota</div>
+      </div>
+      <div class="goal-banner-score">${sA} — ${sB}</div>
+    </div>`;
+  document.body.appendChild(banner);
+
+  requestAnimationFrame(()=>{ banner.classList.add('show'); });
+  setTimeout(()=>{
+    banner.classList.remove('show');
+    setTimeout(()=>banner.remove(), 350);
+  }, 2200);
 }
 
 window.toggleTimer = function(){
@@ -2113,14 +2379,48 @@ window.resetTimer = function(){
 window.addGoal = function(team){
   if(team===0) liveMatch.scoreA++;
   else liveMatch.scoreB++;
-  liveMatch.events.push({
-    time:liveMatch.timer,
-    icon:'⚽',
-    text:`¡Goooool!`,
-    team
-  });
-  showToast(`⚽ ¡GOL del Equipo ${team===0?'A':'B'}!`);
-  showTab('live');
+  liveMatch.events.push({ time:liveMatch.timer, icon:'⚽', text:'¡Goooool!', team });
+
+  // If live tab is active, update DOM in-place (no full re-render)
+  const sbEl = document.getElementById('live-scoreboard');
+  if(sbEl){
+    const sA=liveMatch.scoreA, sB=liveMatch.scoreB;
+    const aLeads=sA>sB, bLeads=sB>sA;
+    // Update scores in-place with pop animation
+    const scoreAEl=document.getElementById('sb-score-a');
+    const scoreBEl=document.getElementById('sb-score-b');
+    if(scoreAEl){ scoreAEl.textContent=sA; }
+    if(scoreBEl){ scoreBEl.textContent=sB; }
+    // Pop the scored team
+    const popEl = team===0?scoreAEl:scoreBEl;
+    if(popEl){ popEl.classList.remove('score-pop'); void popEl.offsetWidth; popEl.classList.add('score-pop'); }
+    // Update leading/trailing classes
+    ['.side-a','.side-b'].forEach((sel,i)=>{
+      const el=sbEl.querySelector(sel); if(!el) return;
+      el.classList.remove('leading','trailing');
+      const leads = i===0?aLeads:bLeads, trails = i===0?bLeads:aLeads;
+      if(leads) el.classList.add('leading');
+      else if(trails) el.classList.add('trailing');
+    });
+    // Flash scoreboard
+    sbEl.classList.remove('goal-flash'); void sbEl.offsetWidth; sbEl.classList.add('goal-flash');
+    // Update half label
+    const halfEl=sbEl.querySelector('.live-sb-half');
+    if(halfEl) halfEl.textContent=liveMatch.active?'EN JUEGO':liveMatch.timer>0?'PAUSA':'ESPERA';
+    // Append event to timeline
+    const timeline=document.getElementById('live-timeline');
+    if(timeline){
+      if(timeline.querySelector('[style*="Sin eventos"]')) timeline.innerHTML='';
+      const ev=liveMatch.events[liveMatch.events.length-1];
+      const item=document.createElement('div');
+      item.className='event-item';
+      item.innerHTML=`<div class="event-time">${formatTimer(ev.time)}</div><div class="event-icon">⚽</div><div><div class="event-text">¡Goooool!</div><div class="event-team" style="color:${team===0?'var(--cyan)':'var(--orange)'}">${team===0?'Equipo A':'Equipo B'}</div></div>`;
+      timeline.insertBefore(item,timeline.firstChild);
+    }
+  } else {
+    showTab('live');
+  }
+  showGoalBanner(team, liveMatch.scoreA, liveMatch.scoreB);
 };
 
 window.undoGoal = function(team){
@@ -2138,7 +2438,12 @@ async function renderCalificar(el){
   const members = groupMembers.filter(u=>u.uid!==currentUser.uid);
   if(!members.length){
     el.innerHTML = `<div class="page-header"><div class="page-title">Calificar</div></div>
-      <div class="empty-state"><span class="icon">👥</span><div class="msg">No hay compañeros para calificar</div></div>`;
+      <div class="empty-state">
+        <div class="empty-icon-wrap">👥</div>
+        <div class="empty-title">Estás solo</div>
+        <div class="empty-msg">No hay compañeros para calificar todavía. Invitá a alguien con el código del grupo.</div>
+        <button class="empty-cta" onclick="showTab('jugadores')">VER CÓDIGO DEL GRUPO →</button>
+      </div>`;
     return;
   }
   const selectedUid = pendingRateUid&&members.find(u=>u.uid===pendingRateUid)
@@ -2531,7 +2836,12 @@ async function renderHistorial(el){
             </div>`:''}
           </div>`;
         }).join('')
-      : '<div class="empty-state"><span class="icon">📋</span><div class="msg">Todavía no hay partidos guardados</div></div>'}
+      : `<div class="empty-state">
+          <div class="empty-icon-wrap">📋</div>
+          <div class="empty-title">Sin partidos aún</div>
+          <div class="empty-msg">Cuando guarden el primer partido va a aparecer el historial acá.</div>
+          <button class="empty-cta" onclick="showTab('asistencia')">ARRANCAR MATCH DAY →</button>
+        </div>`}
   `;
 }
 
