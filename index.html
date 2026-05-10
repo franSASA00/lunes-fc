@@ -755,36 +755,101 @@ canvas.radar-canvas{display:block;margin:0 auto}
 .mvp-option-votes{font-size:11px;color:var(--tx3);margin-top:2px}
 
 /* ══════════════════════════════════════════════════════
-   RATING / CALIFICAR
+   RATING / CALIFICAR v2
 ══════════════════════════════════════════════════════ */
-.slider-group{margin-bottom:18px}
-.slider-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
-.slider-label{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--tx2)}
-.slider-value{font-family:'Bebas Neue',sans-serif;font-size:26px;min-width:32px;text-align:right}
-.slider-input{
-  -webkit-appearance:none;width:100%;height:5px;border-radius:3px;outline:none;cursor:pointer;
-  background:var(--br);
-}
-.slider-input::-webkit-slider-thumb{
-  -webkit-appearance:none;width:20px;height:20px;border-radius:50%;
-  background:var(--cyan);box-shadow:0 0 10px rgba(0,212,255,.4);cursor:pointer;
-  transition:transform .1s;
-}
-.slider-input:active::-webkit-slider-thumb{transform:scale(1.2)}
 
+/* ── Player header card ── */
 .rate-player-header{
-  display:flex;align-items:center;gap:14px;margin-bottom:20px;
-  background:var(--sf2);border-radius:14px;padding:16px;border:1px solid var(--br);
+  display:flex;align-items:center;gap:14px;margin-bottom:16px;
+  background:var(--sf2);border-radius:16px;padding:16px;border:1px solid var(--br);
+  position:relative;overflow:hidden;
+}
+.rate-player-header::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--cyan),#0077ff,transparent);
 }
 .rate-avatar{
-  width:54px;height:54px;border-radius:50%;
+  width:56px;height:56px;border-radius:50%;
   background:linear-gradient(135deg,var(--cyan),#0077ff);
   display:flex;align-items:center;justify-content:center;
-  font-family:'Bebas Neue',sans-serif;font-size:22px;color:#000;flex-shrink:0;
+  font-family:'Bebas Neue',sans-serif;font-size:24px;color:#000;flex-shrink:0;
   box-shadow:0 4px 16px rgba(0,212,255,.3);
 }
-.rate-name{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;letter-spacing:1px}
+.rate-name{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;letter-spacing:1px}
 .rate-sub{font-size:12px;color:var(--tx3);margin-top:2px}
+.rate-overall-badge{
+  margin-left:auto;
+  font-family:'Bebas Neue',sans-serif;font-size:36px;line-height:1;
+  flex-shrink:0;
+}
+
+/* ── Radar container ── */
+.rate-radar-wrap{
+  background:var(--sf2);border:1px solid var(--br);border-radius:16px;
+  padding:16px;margin-bottom:16px;text-align:center;
+}
+.rate-radar-title{
+  font-size:10px;color:var(--tx3);letter-spacing:2px;text-transform:uppercase;
+  margin-bottom:4px;display:flex;align-items:center;justify-content:center;gap:12px;
+}
+.rate-radar-legend{display:flex;gap:12px;justify-content:center;margin-bottom:8px}
+.rate-radar-leg-item{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--tx3)}
+.rate-radar-leg-dot{width:8px;height:8px;border-radius:50%}
+
+/* ── My overall vs avg display ── */
+.rate-compare{
+  display:grid;grid-template-columns:1fr auto 1fr;gap:0;
+  background:var(--sf2);border:1px solid var(--br);border-radius:14px;
+  margin-bottom:16px;overflow:hidden;
+}
+.rate-compare-col{padding:12px;text-align:center}
+.rate-compare-col:first-child{border-right:1px solid var(--br)}
+.rate-compare-col:last-child{border-left:1px solid var(--br)}
+.rate-compare-val{font-family:'Bebas Neue',sans-serif;font-size:32px}
+.rate-compare-lbl{font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:1px;margin-top:2px}
+.rate-compare-sep{display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--tx3);padding:0 8px}
+
+/* ── Sliders v2 ── */
+.sliders-section{
+  background:var(--sf2);border:1px solid var(--br);border-radius:16px;
+  padding:16px;margin-bottom:16px;
+}
+.sliders-section-title{
+  font-size:10px;color:var(--tx3);letter-spacing:2px;text-transform:uppercase;
+  margin-bottom:14px;
+}
+.slider-group{margin-bottom:14px}
+.slider-group:last-child{margin-bottom:0}
+.slider-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.slider-label{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--tx2)}
+.slider-value{
+  font-family:'Bebas Neue',sans-serif;font-size:22px;min-width:30px;text-align:right;
+  transition:color .15s;
+}
+/* Filled track effect using background gradient */
+.slider-input{
+  -webkit-appearance:none;width:100%;height:4px;border-radius:3px;outline:none;cursor:pointer;
+  background:var(--br);
+  transition:background .1s;
+}
+.slider-input::-webkit-slider-thumb{
+  -webkit-appearance:none;width:22px;height:22px;border-radius:50%;
+  background:var(--thumb-color,var(--cyan));
+  box-shadow:0 0 0 3px rgba(0,0,0,.4), 0 0 10px var(--thumb-glow,rgba(0,212,255,.4));
+  cursor:pointer;
+  transition:transform .12s, box-shadow .12s;
+}
+.slider-input:active::-webkit-slider-thumb{
+  transform:scale(1.25);
+  box-shadow:0 0 0 4px rgba(0,0,0,.4), 0 0 18px var(--thumb-glow,rgba(0,212,255,.5));
+}
+/* Avg tick mark */
+.slider-track-wrap{position:relative}
+.slider-avg-tick{
+  position:absolute;top:50%;transform:translateY(-50%);
+  width:2px;height:10px;background:rgba(255,255,255,.25);border-radius:1px;
+  pointer-events:none;
+}
 
 /* ══════════════════════════════════════════════════════
    HISTORY
@@ -2012,13 +2077,109 @@ async function renderCalificar(el){
 
 window.selectRatePlayer = async function(uid){ await buildRateForm(uid); };
 
+/* ── Radar drawing helper ── */
+function drawRateRadar(canvasId, myVals, avgVals){
+  const canvas = document.getElementById(canvasId);
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const cx = W/2, cy = H/2;
+  const R = Math.min(W,H)/2 - 20;
+  const N = SKILLS.length;
+  const angle = i => (i * 2*Math.PI/N) - Math.PI/2;
+
+  ctx.clearRect(0,0,W,H);
+
+  // Grid rings
+  for(let r=0.25;r<=1;r+=0.25){
+    ctx.beginPath();
+    for(let i=0;i<N;i++){
+      const a=angle(i), x=cx+Math.cos(a)*R*r, y=cy+Math.sin(a)*R*r;
+      i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+    }
+    ctx.closePath();
+    ctx.strokeStyle=`rgba(255,255,255,${r===1?.12:.06})`;
+    ctx.lineWidth=1;
+    ctx.stroke();
+  }
+
+  // Axis lines + labels
+  SKILLS.forEach((skill,i)=>{
+    const a=angle(i);
+    ctx.beginPath();
+    ctx.moveTo(cx,cy);
+    ctx.lineTo(cx+Math.cos(a)*R, cy+Math.sin(a)*R);
+    ctx.strokeStyle='rgba(255,255,255,.08)';
+    ctx.lineWidth=1;
+    ctx.stroke();
+
+    const lx=cx+Math.cos(a)*(R+14), ly=cy+Math.sin(a)*(R+14);
+    ctx.fillStyle='rgba(160,180,204,.7)';
+    ctx.font='bold 9px Rajdhani,sans-serif';
+    ctx.textAlign='center';
+    ctx.textBaseline='middle';
+    ctx.fillText(skill.toUpperCase().slice(0,3), lx, ly);
+  });
+
+  // Draw polygon helper
+  function drawPoly(vals, fill, stroke){
+    ctx.beginPath();
+    vals.forEach((v,i)=>{
+      const a=angle(i), r=(v/100)*R;
+      const x=cx+Math.cos(a)*r, y=cy+Math.sin(a)*r;
+      i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+    });
+    ctx.closePath();
+    ctx.fillStyle=fill;
+    ctx.fill();
+    ctx.strokeStyle=stroke;
+    ctx.lineWidth=2;
+    ctx.stroke();
+  }
+
+  // Avg polygon (gray, behind)
+  if(avgVals){
+    const avg = SKILLS.map(s=>avgVals[s]||0);
+    drawPoly(avg,'rgba(90,112,144,.2)','rgba(90,112,144,.5)');
+  }
+
+  // My rating polygon (cyan, front)
+  const my = SKILLS.map(s=>myVals[s]||0);
+  drawPoly(my,'rgba(0,212,255,.15)','rgba(0,212,255,.85)');
+
+  // Dots on vertices
+  my.forEach((v,i)=>{
+    const a=angle(i), r=(v/100)*R;
+    ctx.beginPath();
+    ctx.arc(cx+Math.cos(a)*r, cy+Math.sin(a)*r, 3.5, 0, Math.PI*2);
+    ctx.fillStyle='var(--cyan, #00d4ff)'; // fallback for canvas
+    ctx.fillStyle='#00d4ff';
+    ctx.fill();
+  });
+}
+
+/* ── Thumb color helper ── */
+function sliderThumbColor(v){
+  if(v>=85) return {color:'var(--gold)',glow:'rgba(255,214,0,.5)'};
+  if(v>=70) return {color:'var(--green)',glow:'rgba(0,230,118,.4)'};
+  if(v>=50) return {color:'var(--cyan)',glow:'rgba(0,212,255,.4)'};
+  return {color:'var(--orange)',glow:'rgba(255,107,0,.4)'};
+}
+
+let rateCurrentStats = {}; // avg stats of the rated player
+
 async function buildRateForm(uid){
   const u = groupMembers.find(m=>m.uid===uid); if(!u) return;
-  const {stats} = await getCachedStats(uid);
+  const {stats, overall} = await getCachedStats(uid);
   const rSnap = await getDoc(doc(db,'ratings', currentGroup.id+'_'+uid));
   const myPrev = rSnap.exists() ? ((rSnap.data().ratings||{})[currentUser.uid]||{}) : {};
   rateSliders = {};
+  rateCurrentStats = stats;
   SKILLS.forEach(s=>{ rateSliders[s] = myPrev[s]??stats[s]??50; });
+
+  const myOverall = Math.round(SKILLS.reduce((a,s)=>a+(rateSliders[s]||0),0)/SKILLS.length);
+  const col = overallColor(overall);
+
   const container = document.getElementById('rate-form-container'); if(!container) return;
   container.innerHTML = `
     <div class="rate-player-header">
@@ -2027,26 +2188,84 @@ async function buildRateForm(uid){
         <div class="rate-name">${u.nombre} ${u.apellido}</div>
         <div class="rate-sub">${u.edad} años · ${POSITIONS[u.posicion]||'Jugador'} · Pie ${u.pie}</div>
       </div>
+      <div class="rate-overall-badge" style="color:${col}">${overall||'—'}</div>
     </div>
-    ${SKILLS.map(skill=>{
-      const vv = rateSliders[skill];
-      const col = overallColor(vv);
-      return`<div class="slider-group">
-        <div class="slider-header">
-          <div class="slider-label">${skill}</div>
-          <div class="slider-value" id="sv_${skill}" style="color:${col}">${vv}</div>
-        </div>
-        <input type="range" class="slider-input" min="0" max="100" value="${vv}" oninput="updateSlider('${uid}','${skill}',this.value)">
-      </div>`;
-    }).join('')}
-    <button class="btn-primary" style="margin-top:8px" onclick="submitRating('${uid}')">✓ GUARDAR CALIFICACIÓN</button>
+
+    <div class="rate-radar-wrap">
+      <div class="rate-radar-legend">
+        <div class="rate-radar-leg-item"><div class="rate-radar-leg-dot" style="background:#00d4ff"></div>Tu calificación</div>
+        <div class="rate-radar-leg-item"><div class="rate-radar-leg-dot" style="background:rgba(90,112,144,.7)"></div>Promedio grupo</div>
+      </div>
+      <canvas id="rate-radar-canvas" width="220" height="220" style="display:block;margin:0 auto"></canvas>
+    </div>
+
+    <div class="rate-compare">
+      <div class="rate-compare-col">
+        <div class="rate-compare-val" id="rate-my-ovr" style="color:${overallColor(myOverall)}">${myOverall}</div>
+        <div class="rate-compare-lbl">Tu calificación</div>
+      </div>
+      <div class="rate-compare-sep">vs</div>
+      <div class="rate-compare-col">
+        <div class="rate-compare-val" style="color:${col}">${overall||'—'}</div>
+        <div class="rate-compare-lbl">Promedio grupo</div>
+      </div>
+    </div>
+
+    <div class="sliders-section">
+      <div class="sliders-section-title">Atributos</div>
+      ${SKILLS.map(skill=>{
+        const vv = rateSliders[skill];
+        const avg = stats[skill]||0;
+        const tc = sliderThumbColor(vv);
+        const pct = avg+'%';
+        return`<div class="slider-group">
+          <div class="slider-header">
+            <div class="slider-label">${skill}</div>
+            <div class="slider-value" id="sv_${skill}" style="color:${overallColor(vv)}">${vv}</div>
+          </div>
+          <div class="slider-track-wrap">
+            <input type="range" class="slider-input" id="si_${skill}" min="0" max="100" value="${vv}"
+              style="--thumb-color:${tc.color};--thumb-glow:${tc.glow}"
+              oninput="updateSlider('${uid}','${skill}',this.value)">
+            <div class="slider-avg-tick" style="left:calc(${pct} - 1px)" title="Promedio: ${avg}"></div>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>
+
+    <button class="btn-primary" onclick="submitRating('${uid}')">✓ GUARDAR CALIFICACIÓN</button>
   `;
+
+  // Draw initial radar
+  drawRateRadar('rate-radar-canvas', rateSliders, stats);
+  updateSliderTracks();
 }
 
-window.updateSlider = function(uid,skill,val){
-  val = parseInt(val); rateSliders[skill]=val;
-  const el = document.getElementById('sv_'+skill);
-  if(el){ el.textContent=val; el.style.color=overallColor(val); }
+function updateSliderTracks(){
+  SKILLS.forEach(s=>{
+    const input = document.getElementById('si_'+s);
+    if(!input) return;
+    const v = rateSliders[s];
+    const tc = sliderThumbColor(v);
+    // Filled track: gradient from accent to dark
+    input.style.background = `linear-gradient(to right, ${tc.color.replace('var(--cyan)','#00d4ff').replace('var(--green)','#00e676').replace('var(--gold)','#ffd600').replace('var(--orange)','#ff6b00')} 0%, ${tc.color.replace('var(--cyan)','#00d4ff').replace('var(--green)','#00e676').replace('var(--gold)','#ffd600').replace('var(--orange)','#ff6b00')} ${v}%, rgba(28,43,66,.8) ${v}%, rgba(28,43,66,.8) 100%)`;
+    input.style.setProperty('--thumb-color', tc.color);
+    input.style.setProperty('--thumb-glow', tc.glow);
+  });
+}
+
+window.updateSlider = function(uid, skill, val){
+  val = parseInt(val); rateSliders[skill] = val;
+  const valEl = document.getElementById('sv_'+skill);
+  if(valEl){ valEl.textContent=val; valEl.style.color=overallColor(val); }
+  // Update radar live
+  drawRateRadar('rate-radar-canvas', rateSliders, rateCurrentStats);
+  // Update compare overall
+  const myOvr = Math.round(SKILLS.reduce((a,s)=>a+(rateSliders[s]||0),0)/SKILLS.length);
+  const ovrEl = document.getElementById('rate-my-ovr');
+  if(ovrEl){ ovrEl.textContent=myOvr; ovrEl.style.color=overallColor(myOvr); }
+  // Update track fill + thumb color
+  updateSliderTracks();
 };
 
 window.submitRating = async function(uid){
