@@ -265,34 +265,62 @@ input,select{font-family:inherit}
   -webkit-overflow-scrolling:touch;
 }
 
-/* ── TAB BAR — Glassmorphism ── */
+/* ── TAB BAR — Glassmorphism v2 ── */
 .tab-bar{
   height:var(--th);
-  background:var(--glass);
-  border-top:1px solid rgba(255,255,255,.05);
-  backdrop-filter:blur(20px);
-  display:flex;align-items:stretch;flex-shrink:0;
-  padding-bottom:var(--safe);
+  background:rgba(6,8,16,.92);
+  border-top:1px solid rgba(255,255,255,.06);
+  backdrop-filter:blur(24px);
+  -webkit-backdrop-filter:blur(24px);
+  display:flex;align-items:center;flex-shrink:0;
+  padding:6px 8px calc(6px + var(--safe));
+  gap:4px;
   position:relative;
 }
+/* Top cyan line */
 .tab-bar::before{
   content:'';position:absolute;top:0;left:0;right:0;height:1px;
-  background:linear-gradient(90deg,transparent,rgba(0,212,255,.3),transparent);
+  background:linear-gradient(90deg,transparent 5%,rgba(0,212,255,.25) 50%,transparent 95%);
 }
 .tab-item{
   flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:2px;color:var(--tx3);font-size:9px;font-weight:700;letter-spacing:.5px;
-  text-transform:uppercase;transition:color .2s;padding:6px 2px;
+  gap:3px;color:var(--tx3);font-size:8.5px;font-weight:700;letter-spacing:.4px;
+  text-transform:uppercase;
+  padding:7px 2px;border-radius:12px;
   position:relative;
+  transition:color .2s ease, background .2s ease;
+  -webkit-tap-highlight-color:transparent;
 }
-.tab-item.active{color:var(--cyan)}
-.tab-item.active::after{
-  content:'';position:absolute;bottom:0;left:20%;right:20%;height:2px;
+/* Active pill highlight */
+.tab-item.active{
+  color:var(--cyan);
+  background:rgba(0,212,255,.1);
+}
+/* Cyan dot indicator at top of pill */
+.tab-item.active::before{
+  content:'';
+  position:absolute;top:5px;left:50%;transform:translateX(-50%);
+  width:20px;height:2px;border-radius:2px;
   background:linear-gradient(90deg,transparent,var(--cyan),transparent);
-  border-radius:2px 2px 0 0;
-  box-shadow:0 0 8px var(--cyan);
+  box-shadow:0 0 6px rgba(0,212,255,.6);
 }
-.tab-icon{font-size:20px;line-height:1}
+/* Icon bounce on activate */
+@keyframes tabBounce{0%{transform:scale(1)}40%{transform:scale(1.25) translateY(-2px)}70%{transform:scale(.92)}100%{transform:scale(1)}}
+.tab-item.active .tab-icon{
+  animation:tabBounce .35s cubic-bezier(.22,1,.5,1);
+  filter:drop-shadow(0 0 6px rgba(0,212,255,.5));
+}
+.tab-icon{font-size:19px;line-height:1;transition:filter .2s}
+/* Live tab special state — pulsing red when match active */
+.tab-item.live-active{color:var(--red);background:rgba(255,23,68,.1)}
+.tab-item.live-active::before{
+  background:linear-gradient(90deg,transparent,var(--red),transparent);
+  box-shadow:0 0 6px rgba(255,23,68,.6);
+}
+.tab-item.live-active .tab-icon{
+  animation:tabBounce .35s cubic-bezier(.22,1,.5,1), liveDot 1.4s ease infinite;
+}
+@keyframes liveDot{0%,100%{filter:drop-shadow(0 0 4px rgba(255,23,68,.4))}50%{filter:drop-shadow(0 0 10px rgba(255,23,68,.8))}}
 
 /* ══════════════════════════════════════════════════════
    PAGE HEADER
@@ -1101,19 +1129,24 @@ canvas.radar-canvas{display:block;margin:0 auto}
   <div class="main-content" id="main-content"></div>
   <nav class="tab-bar">
     <div class="tab-item active" onclick="showTab('jugadores')" id="tab-jugadores">
-      <span class="tab-icon">👥</span>Squad
+      <span class="tab-icon">👥</span>
+      <span>Squad</span>
     </div>
     <div class="tab-item" onclick="showTab('asistencia')" id="tab-asistencia">
-      <span class="tab-icon">✅</span>Match
+      <span class="tab-icon">📋</span>
+      <span>Match</span>
     </div>
     <div class="tab-item" onclick="showTab('live')" id="tab-live">
-      <span class="tab-icon">🔴</span>Live
+      <span class="tab-icon">🔴</span>
+      <span>Live</span>
     </div>
     <div class="tab-item" onclick="showTab('calificar')" id="tab-calificar">
-      <span class="tab-icon">⭐</span>Rate
+      <span class="tab-icon">⭐</span>
+      <span>Rate</span>
     </div>
     <div class="tab-item" onclick="showTab('historial')" id="tab-historial">
-      <span class="tab-icon">📊</span>Stats
+      <span class="tab-icon">📊</span>
+      <span>Stats</span>
     </div>
   </nav>
 </div>
@@ -1439,9 +1472,29 @@ function showMain(){
 
 function showTab(tab){
   currentTab = tab;
-  document.querySelectorAll('.tab-item').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.tab-item').forEach(el=>{
+    el.classList.remove('active','live-active');
+  });
   const tabEl = document.getElementById('tab-'+tab);
-  if(tabEl) tabEl.classList.add('active');
+  if(tabEl){
+    // Live tab gets a special red state when a match is running
+    if(tab==='live' && liveMatch.active){
+      tabEl.classList.add('live-active');
+    } else {
+      tabEl.classList.add('active');
+    }
+    // Re-trigger bounce by cloning the icon
+    const icon = tabEl.querySelector('.tab-icon');
+    if(icon){
+      const clone = icon.cloneNode(true);
+      icon.replaceWith(clone);
+    }
+  }
+  // Also keep the Live tab visually pulsing when a match is active, regardless of selected tab
+  if(tab !== 'live' && liveMatch.active){
+    const liveEl = document.getElementById('tab-live');
+    if(liveEl) liveEl.classList.add('live-active');
+  }
   const content = document.getElementById('main-content');
   content.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;padding:60px 0">
     <div style="width:32px;height:32px;border:2px solid var(--br);border-top-color:var(--cyan);border-radius:50%;animation:spin .8s linear infinite"></div>
