@@ -1732,9 +1732,10 @@ window.createGroup = async function(){
   if(!name){ showToast('⚠️ Ingresá un nombre'); return; }
   const id='g_'+Date.now(), code=genCode();
   await setDoc(doc(db,'groups',id),{
-    id, name, code, members:[currentUser.uid],
-    createdAt:Date.now(), history:[], season:1
-  });
+  id, name, code, members:[currentUser.uid],
+  createdBy: currentUser.uid,  // ← agregar esta línea
+  createdAt:Date.now(), history:[], season:1
+});
   document.getElementById('new-group-name').value='';
   showToast('✓ ¡Grupo creado!');
   await enterGroup(id);
