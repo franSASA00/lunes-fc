@@ -2231,6 +2231,7 @@ window.eliminarMiembro = async function(uid){
 };
    
 window.proponerFecha = async function(){
+  if(!canManage()){ showToast('⚠️ No tenés permisos'); return; }
   const dia = document.getElementById('fecha-dia')?.value;
   const hora = document.getElementById('fecha-hora')?.value;
   const min = parseInt(document.getElementById('fecha-min')?.value)||8;
@@ -2244,6 +2245,7 @@ window.proponerFecha = async function(){
 };
 
 window.cancelarFecha = async function(){
+  if(!canManage()){ showToast('⚠️ No tenés permisos'); return; }
   const f = {...currentGroup.proximaFecha, cancelada: true};
   await updateDoc(doc(db,'groups', currentGroup.id), { proximaFecha: f });
   currentGroup.proximaFecha = f;
