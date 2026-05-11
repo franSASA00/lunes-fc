@@ -1381,6 +1381,7 @@ canvas.radar-canvas{display:block;margin:0 auto}
       </div>
       <div class="form-error" id="login-error"></div>
       <button class="btn-primary" onclick="doLogin()">⚡ ENTRAR</button>
+      <button class="btn-secondary" style="margin-top:8px" onclick="doResetPassword()">🔑 Olvidé mi contraseña</button>
     </div>
     <div id="register-form" class="auth-form">
       <div class="form-row">
@@ -1512,7 +1513,7 @@ canvas.radar-canvas{display:block;margin:0 auto}
 ═══════════════════════════════════════════════════════ -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged }
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, query, where, getDocs, arrayUnion, onSnapshot }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -1648,7 +1649,18 @@ window.doRegister = async function(){
     showErr(err, msgs[e.code]||e.message);
   }
 };
-
+window.doResetPassword = async function(){
+  const email = v('login-email').toLowerCase();
+  const err = document.getElementById('login-error');
+  hideErr(err);
+  if(!email){ showErr(err,'Ingresá tu email primero'); return; }
+  try {
+    await sendPasswordResetEmail(auth, email);
+    showToast('📧 ¡Email de recupero enviado! Revisá tu casilla');
+  } catch(e){
+    showErr(err,'No encontramos ese email. ¿Está bien escrito?');
+  }
+};
 window.doLogin = async function(){
   const email=v('login-email').toLowerCase(), pass=v('login-pass');
   const err = document.getElementById('login-error');
