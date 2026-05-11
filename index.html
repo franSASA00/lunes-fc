@@ -104,7 +104,10 @@ input,select{font-family:inherit}
   margin-top:24px;
 }
 .load-tagline{font-size:11px;color:var(--tx3);letter-spacing:4px;text-transform:uppercase;margin-top:8px}
-@keyframes spin{to{transform:rotate(360deg)}}
+
+   @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+   @keyframes slideUp{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
+   @keyframes spin{to{transform:rotate(360deg)}}
 
 /* ══════════════════════════════════════════════════════
    AUTH SCREEN
