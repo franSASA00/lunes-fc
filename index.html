@@ -1837,6 +1837,7 @@ async function setAttendance(uid, confirmed){
 function showMain(){
   showScreen('main-screen');
   showTab(currentTab||'jugadores');
+  checkFechaPopup();
 }
 
 function showTab(tab){
