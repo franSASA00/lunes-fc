@@ -1607,6 +1607,16 @@ function statBarClass(v){
   if(v>=40) return 'avg';
   return 'low';
 }
+
+function isSupremo(){ return currentGroup?.createdBy === currentUser.uid; }
+function isAdmin(){ return currentGroup?.admins?.includes(currentUser.uid); }
+function canManage(){ return isSupremo() || isAdmin(); }
+function getRolBadge(uid){
+  if(currentGroup?.createdBy===uid) return '<span class="chip chip-gold" style="font-size:9px">👑 Supremo</span>';
+  if(currentGroup?.admins?.includes(uid)) return '<span class="chip chip-purple" style="font-size:9px">🛡️ Admin</span>';
+  return '<span class="chip" style="font-size:9px;background:rgba(255,255,255,.05);color:var(--tx3)">👤 Jugador</span>';
+}
+   
 function getEloRank(elo){
   return ELO_RANKS.find(r => elo >= r.min) || ELO_RANKS[ELO_RANKS.length-1];
 }
