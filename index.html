@@ -2073,6 +2073,9 @@ async function renderAsistencia(el){
   const avgOvr = confirmed.length
     ? Math.round(confirmed.reduce((s,u)=>(s+(statsMap[u.uid]?.overall||0)),0)/confirmed.length)
     : 0;
+  const n = confirmed.length;
+  const perTeam = Math.ceil(n/2);
+  const teamA = perTeam, teamB = n - perTeam;
 
   el.innerHTML = `
     <div class="page-header">
@@ -2082,12 +2085,20 @@ async function renderAsistencia(el){
       </div>
     </div>
     <div class="conf-hero">
-      <div class="conf-hero-item"><div class="conf-hero-val">${confirmed.length}</div><div class="conf-hero-lbl">Confirmados</div></div>
-      <div class="conf-hero-item"><div class="conf-hero-val">${groupMembers.length-confirmed.length}</div><div class="conf-hero-lbl">Faltantes</div></div>
+      <div class="conf-hero-item"><div class="conf-hero-val">${n}</div><div class="conf-hero-lbl">Confirmados</div></div>
+      <div class="conf-hero-item"><div class="conf-hero-val">${groupMembers.length-n}</div><div class="conf-hero-lbl">Faltantes</div></div>
       <div class="conf-hero-item"><div class="conf-hero-val" style="color:${overallColor(avgOvr)}">${avgOvr||'—'}</div><div class="conf-hero-lbl">Avg OVR</div></div>
     </div>
 
-    ${confirmed.length>=4?`<button class="draw-btn" style="margin-bottom:16px" onclick="showTab('equipos')">⚔️ SORTEAR EQUIPOS</button>`:''}
+    ${n>=4?`
+    <div style="background:var(--sf2);border:1px solid var(--br);border-radius:14px;padding:14px;margin-bottom:16px;text-align:center">
+      <div style="font-size:11px;color:var(--tx3);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">Formato del partido</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:48px;color:var(--cyan);line-height:1">
+        ${teamA}<span style="color:var(--tx3);font-size:28px;margin:0 8px">vs</span>${teamB}
+      </div>
+      <div style="font-size:12px;color:var(--tx3);margin-top:4px">${n} jugadores confirmados</div>
+    </div>
+    <button class="draw-btn" style="margin-bottom:16px" onclick="showTab('equipos')">⚔️ SORTEAR EQUIPOS ${teamA}v${teamB}</button>`:''}
 
     <div class="section-title">Lista de Jugadores</div>
     <div class="attendance-list">
