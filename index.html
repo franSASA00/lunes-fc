@@ -2230,7 +2230,74 @@ window.eliminarMiembro = async function(uid){
   showToast('✓ Jugador eliminado del grupo');
   showTab('jugadores');
 };
-   
+
+async function checkFechaPopup(){
+  const fecha = currentGroup.proximaFecha;
+  if(!fecha || fecha.cancelada) return;
+  const att = await getAttendance();
+  const yaConfirmo = att[currentUser.uid] !== undefined;
+  if(yaConfirmo) return;
+
+  // Crear popup
+  const overlay = document.createElement('div');
+  overlay.id = 'fecha-popup';
+  overlay.style.cssText = `
+    position:fixed;inset:0;background:rgba(0,0,0,.85);
+    display:flex;align-items:center;justify-content:center;
+    z-index:999;padding:24px;
+    animation:fadeIn .25s ease;
+  `;
+  overlay.innerHTML = `
+    <div style="
+      background:var(--sf);border:1px solid var(--br2);border-radius:24px;
+      padding:28px;width:100%;max-width:360px;
+      box-shadow:0 30px 80px rgba(0,0,0,.6);
+      animation:slideUp .3s cubic-bezier(.22,1,.5,1);
+    ">
+      <div style="text-align:center;margin-bottom:20px">
+        <div style="font-size:40px;margin-bottom:8px">📅</div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--cyan)">¡Nuevo Partido!</div>
+        <div style="font-size:14px;color:var(--tx2);margin-top:4px">${currentGroup.name}</div>
+      </div>
+      <div style="background:var(--sf2);border:1px solid var(--br);border-radius:14px;padding:16px;margin-bottom:20px;text-align:center">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:26px;color:var(--tx);line-height:1.2">${fecha.dia}</div>
+        <div style="font-size:15px;color:var(--tx2);margin-top:6px">🕐 ${fecha.hora}hs</div>
+        <div style="font-size:12px;color:var(--tx3);margin-top:4px">Mínimo ${fecha.minJugadores} jugadores</div>
+      </div>
+      <div style="font-size:13px;color:var(--tx3);text-align:center;margin-bottom:16px">¿Vas a poder ir?</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <button onclick="responderFechaPopup(true)" style="
+          padding:16px;border-radius:14px;
+          background:linear-gradient(135deg,var(--green),#00bfa5);
+          color:#000;font-size:15px;font-weight:800;letter-spacing:1px;
+          text-transform:uppercase;border:none;cursor:pointer;
+          box-shadow:0 4px 16px rgba(0,230,118,.3);
+        ">✓ VOY</button>
+        <button onclick="responderFechaPopup(false)" style="
+          padding:16px;border-radius:14px;
+          background:rgba(255,23,68,.15);
+          border:1px solid rgba(255,23,68,.3);
+          color:var(--red);font-size:15px;font-weight:800;letter-spacing:1px;
+          text-transform:uppercase;cursor:pointer;
+        ">✗ NO PUEDO</button>
+      </div>
+      <button onclick="document.getElementById('fecha-popup').remove()" style="
+        width:100%;margin-top:10px;padding:10px;
+        background:transparent;border:none;
+        color:var(--tx3);font-size:12px;cursor:pointer;
+      ">Decidir después</button>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+}
+
+window.responderFechaPopup = async function(va){
+  await setAttendance(currentUser.uid, va);
+  document.getElementById('fecha-popup')?.remove();
+  showToast(va ? '✓ ¡Confirmaste que vas!' : '👍 Registramos que no podés');
+  showTab('asistencia');
+};
+
 window.proponerFecha = async function(){
   if(!canManage()){ showToast('⚠️ No tenés permisos'); return; }
   const dia = document.getElementById('fecha-dia')?.value;
