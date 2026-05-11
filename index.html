@@ -2200,6 +2200,35 @@ async function renderAsistencia(el){
     </div>
   `;
 }
+
+window.hacerAdmin = async function(uid){
+  const admins = [...(currentGroup.admins||[]), uid];
+  await updateDoc(doc(db,'groups', currentGroup.id), { admins });
+  currentGroup.admins = admins;
+  showToast('🛡️ ¡Usuario ascendido a Admin!');
+  showTab('jugadores');
+};
+
+window.quitarAdmin = async function(uid){
+  const admins = (currentGroup.admins||[]).filter(id=>id!==uid);
+  await updateDoc(doc(db,'groups', currentGroup.id), { admins });
+  currentGroup.admins = admins;
+  showToast('👤 Admin removido');
+  showTab('jugadores');
+};
+
+window.eliminarMiembro = async function(uid){
+  if(uid===currentGroup.createdBy){ showToast('⚠️ No podés eliminar al Supremo'); return; }
+  if(!confirm('¿Seguro que querés eliminar a este jugador del grupo?')) return;
+  const members = currentGroup.members.filter(id=>id!==uid);
+  const admins = (currentGroup.admins||[]).filter(id=>id!==uid);
+  await updateDoc(doc(db,'groups', currentGroup.id), { members, admins });
+  currentGroup.members = members;
+  currentGroup.admins = admins;
+  groupMembers = groupMembers.filter(u=>u.uid!==uid);
+  showToast('✓ Jugador eliminado del grupo');
+  showTab('jugadores');
+};
    
 window.proponerFecha = async function(){
   const dia = document.getElementById('fecha-dia')?.value;
