@@ -2076,6 +2076,8 @@ async function renderAsistencia(el){
   const n = confirmed.length;
   const perTeam = Math.ceil(n/2);
   const teamA = perTeam, teamB = n - perTeam;
+  const isCreator = currentGroup.createdBy === currentUser.uid;
+  const fecha = currentGroup.proximaFecha || null;
 
   el.innerHTML = `
     <div class="page-header">
@@ -2084,13 +2086,59 @@ async function renderAsistencia(el){
         <div class="page-subtitle">Próximo partido</div>
       </div>
     </div>
-    <div class="conf-hero">
-      <div class="conf-hero-item"><div class="conf-hero-val">${n}</div><div class="conf-hero-lbl">Confirmados</div></div>
-      <div class="conf-hero-item"><div class="conf-hero-val">${groupMembers.length-n}</div><div class="conf-hero-lbl">Faltantes</div></div>
-      <div class="conf-hero-item"><div class="conf-hero-val" style="color:${overallColor(avgOvr)}">${avgOvr||'—'}</div><div class="conf-hero-lbl">Avg OVR</div></div>
-    </div>
 
-    ${n>=4?`
+    <!-- FECHA PROPUESTA -->
+    ${fecha ? `
+    <div style="background:${fecha.cancelada?'rgba(255,23,68,.08)':'linear-gradient(135deg,rgba(0,212,255,.08),rgba(0,119,255,.05))'};border:1px solid ${fecha.cancelada?'rgba(255,23,68,.3)':'rgba(0,212,255,.25)'};border-radius:16px;padding:16px;margin-bottom:16px;position:relative">
+      <div style="font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:${fecha.cancelada?'var(--red)':'var(--cyan)'};margin-bottom:8px">${fecha.cancelada?'❌ PARTIDO CANCELADO':'📅 PRÓXIMO PARTIDO'}</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--tx);line-height:1">${fecha.dia}</div>
+      <div style="font-size:14px;color:var(--tx2);margin-top:2px">🕐 ${fecha.hora}hs · Mínimo ${fecha.minJugadores} jugadores</div>
+      ${fecha.cancelada
+        ? `<div style="font-size:12px;color:var(--red);margin-top:8px">El partido fue cancelado por el organizador.</div>`
+        : `<div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+            <div style="font-size:12px;color:var(--green)">✓ Van: <b>${n}</b></div>
+            <div style="font-size:12px;color:var(--tx3)">· Necesitan: <b>${fecha.minJugadores}</b></div>
+            ${n>=fecha.minJugadores
+              ? `<div style="font-size:12px;color:var(--green)">🟢 ¡Hay partido!</div>`
+              : `<div style="font-size:12px;color:var(--orange)">⚠️ Faltan ${fecha.minJugadores-n}</div>`}
+          </div>`}
+      ${isCreator && !fecha.cancelada ? `
+        <button onclick="cancelarFecha()" style="margin-top:12px;padding:8px 16px;border-radius:8px;background:rgba(255,23,68,.15);border:1px solid rgba(255,23,68,.3);color:var(--red);font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase">
+          ❌ CANCELAR FECHA
+        </button>` : ''}
+      ${isCreator ? `
+        <button onclick="borrarFecha()" style="margin-top:8px;margin-left:8px;padding:8px 16px;border-radius:8px;background:transparent;border:1px solid var(--br2);color:var(--tx3);font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase">
+          🗑 PROPONER NUEVA
+        </button>` : ''}
+    </div>
+    ` : isCreator ? `
+    <!-- FORM NUEVA FECHA -->
+    <div style="background:var(--sf2);border:1px solid var(--br);border-radius:16px;padding:16px;margin-bottom:16px">
+      <div style="font-size:11px;color:var(--cyan);font-weight:800;letter-spacing:2px;text-transform:uppercase;margin-bottom:14px">📅 Proponer Fecha</div>
+      <div class="form-group">
+        <label class="form-label">Día</label>
+        <input type="date" class="form-input" id="fecha-dia" min="${new Date().toISOString().split('T')[0]}">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Hora</label>
+          <input type="time" class="form-input" id="fecha-hora">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Mínimo jugadores</label>
+          <input type="number" class="form-input" id="fecha-min" placeholder="8" min="4" max="30" value="8">
+        </div>
+      </div>
+      <button class="btn-primary" onclick="proponerFecha()">📅 PROPONER FECHA</button>
+    </div>
+    ` : `
+    <div style="background:var(--sf2);border:1px solid var(--br);border-radius:14px;padding:14px;margin-bottom:16px;text-align:center">
+      <div style="font-size:13px;color:var(--tx3)">⏳ El organizador todavía no propuso fecha</div>
+    </div>
+    `}
+
+    <!-- CONFIRMADOS -->
+    ${!fecha?.cancelada && n>=4 ? `
     <div style="background:var(--sf2);border:1px solid var(--br);border-radius:14px;padding:14px;margin-bottom:16px;text-align:center">
       <div style="font-size:11px;color:var(--tx3);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">Formato del partido</div>
       <div style="font-family:'Bebas Neue',sans-serif;font-size:48px;color:var(--cyan);line-height:1">
@@ -2098,7 +2146,7 @@ async function renderAsistencia(el){
       </div>
       <div style="font-size:12px;color:var(--tx3);margin-top:4px">${n} jugadores confirmados</div>
     </div>
-    <button class="draw-btn" style="margin-bottom:16px" onclick="showTab('equipos')">⚔️ SORTEAR EQUIPOS ${teamA}v${teamB}</button>`:''}
+    <button class="draw-btn" style="margin-bottom:16px" onclick="showTab('equipos')">⚔️ SORTEAR EQUIPOS ${teamA}v${teamB}</button>` : ''}
 
     <div class="section-title">Lista de Jugadores</div>
     <div class="attendance-list">
