@@ -2106,7 +2106,7 @@ async function renderAsistencia(el){
   const n = confirmed.length;
   const perTeam = Math.ceil(n/2);
   const teamA = perTeam, teamB = n - perTeam;
-  const isCreator = currentGroup.createdBy === currentUser.uid;
+  const isCreator = canManage();
   const fecha = currentGroup.proximaFecha || null;
 
   el.innerHTML = `
