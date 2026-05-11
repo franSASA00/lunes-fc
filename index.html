@@ -2872,7 +2872,11 @@ window.selectRatePlayer=window.selectRatePlayer;
 window.toggleTimer=window.toggleTimer;
 window.resetTimer=window.resetTimer;
 window.addGoal=window.addGoal;
-window.undoGoal=window.undoGoal;  if ('serviceWorker' in navigator) {
+window.undoGoal=window.undoGoal;
+</script>
+
+<script>
+  if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('./service-worker.js')
         .then(r => console.log('SW registrado:', r.scope))
