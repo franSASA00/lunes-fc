@@ -2343,15 +2343,14 @@ function estaBloquadaAsistencia() {
   const fecha = currentGroup?.proximaFecha;
   if (!fecha || fecha.cancelada) return false;
 
-  // fecha.hora viene como "20:00" (formato HH:MM del input type="time")
   const [hh, mm] = fecha.hora.split(':').map(Number);
-
-  // Construimos la fecha del partido en el día correcto
   const now = new Date();
-  const partido = new Date();
+
+  // Usamos creadaEn para saber el día exacto del partido
+  const partido = new Date(fecha.creadaEn);
   partido.setHours(hh, mm, 0, 0);
 
-  // Si la hora ya pasó hoy, el partido es mañana
+  // Si la fecha del partido ya pasó por completo, bloqueado
   if (partido < now) return true;
 
   const diffMinutos = (partido - now) / 1000 / 60;
