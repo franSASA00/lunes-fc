@@ -1559,6 +1559,16 @@ canvas.radar-canvas{display:block;margin:0 auto}
   </div>
 </div>
 
+<!-- ═══ SCORER PICKER ═══ -->
+<div class="scorer-modal" id="scorer-modal" onclick="closeScorerModal()">
+  <div class="scorer-sheet" onclick="event.stopPropagation()">
+    <div class="scorer-handle"></div>
+    <div class="scorer-title" id="scorer-title">⚽ ¿Quién metió el gol?</div>
+    <div class="scorer-grid" id="scorer-grid"></div>
+    <button class="scorer-skip" onclick="confirmGoal(null)">Sin asignar</button>
+  </div>
+</div>
+   
 <!-- ═══ TOAST ═══ -->
 <div class="toast" id="toast"></div>
 
