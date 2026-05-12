@@ -2350,12 +2350,26 @@ function estaBloquadaAsistencia() {
   return diffMinutos <= 60;
 }
 
-window.toggleMyAttendance = async function(){
+window.toggleMyAttendance = async function() {
+  if (estaBloquadaAsistencia()) {
+    const hora = currentGroup.proximaFecha.hora;
+    showToast(`⏱ Confirmación cerrada — debías responder antes de las ${horaCorte(hora)}hs`);
+    return;
+  }
   const att = await getAttendance();
-  const cur = att[currentUser.uid]||false;
+  const cur = att[currentUser.uid] || false;
   await setAttendance(currentUser.uid, !cur);
-  showToast(!cur?'✓ ¡Confirmaste tu asistencia!':'Cancelaste tu asistencia');
+  showToast(!cur ? '✓ ¡Confirmaste tu asistencia!' : 'Cancelaste tu asistencia');
   showTab('asistencia');
+};
+
+// Helper: calcula la hora de corte (1 hora antes)
+function horaCorte(horaPartido) {
+  const [hh, mm] = horaPartido.split(':').map(Number);
+  const corte = new Date();
+  corte.setHours(hh - 1, mm, 0, 0);
+  return corte.getHours().toString().padStart(2, '0') + ':' +
+         corte.getMinutes().toString().padStart(2, '0');
 };
 
 /* ══════════════════════════════════════════════
