@@ -1346,6 +1346,57 @@ canvas.radar-canvas{display:block;margin:0 auto}
 .lb-name{font-weight:700;font-size:14px}
 .lb-sub{font-size:11px;color:var(--tx3);margin-top:1px}
 .lb-val{font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--cyan)}
+
+/* ── SCORER PICKER MODAL ── */
+.scorer-modal{
+  position:fixed;inset:0;background:rgba(0,0,0,.88);
+  display:flex;align-items:flex-end;justify-content:center;
+  z-index:300;opacity:0;pointer-events:none;
+  transition:opacity .2s;
+}
+.scorer-modal.open{opacity:1;pointer-events:auto}
+.scorer-sheet{
+  background:var(--sf);border-radius:24px 24px 0 0;
+  width:100%;max-width:480px;
+  transform:translateY(60px);
+  transition:transform .3s cubic-bezier(.22,1.2,.5,1);
+  border-top:1px solid var(--br2);
+  box-shadow:0 -20px 60px rgba(0,0,0,.5);
+  padding:0 0 32px;
+}
+.scorer-modal.open .scorer-sheet{transform:translateY(0)}
+.scorer-handle{width:40px;height:4px;background:var(--br2);border-radius:2px;margin:14px auto 0}
+.scorer-title{
+  font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:800;
+  letter-spacing:2px;text-transform:uppercase;
+  padding:16px 20px 12px;
+  display:flex;align-items:center;gap:10px;
+}
+.scorer-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:8px;
+  padding:0 16px 12px;max-height:55dvh;overflow-y:auto;
+}
+.scorer-btn{
+  display:flex;align-items:center;gap:10px;
+  padding:12px;border-radius:14px;
+  background:var(--sf2);border:1px solid var(--br);
+  transition:all .15s;text-align:left;
+}
+.scorer-btn:active{border-color:var(--cyan);background:rgba(0,212,255,.08);transform:scale(.97)}
+.scorer-btn.team-b:active{border-color:var(--orange);background:rgba(255,107,0,.08)}
+.scorer-btn-avatar{
+  width:34px;height:34px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Bebas Neue',sans-serif;font-size:14px;color:#000;
+}
+.scorer-btn-name{font-size:12px;font-weight:700;line-height:1.2}
+.scorer-btn-ovr{font-size:10px;color:var(--tx3);margin-top:1px}
+.scorer-skip{
+  margin:4px 16px 0;width:calc(100% - 32px);padding:13px;
+  border-radius:12px;background:transparent;border:1px solid var(--br2);
+  color:var(--tx3);font-size:13px;font-weight:600;letter-spacing:.5px;
+}
+
 </style>
 </head>
 <body>
