@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>LunesFC — El FIFA del Fútbol Amateur</title>
+<title>La Pechera — El FIFA del Fútbol Amateur</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&family=Barlow+Condensed:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <!-- PWA -->
@@ -1354,7 +1354,7 @@ canvas.radar-canvas{display:block;margin:0 auto}
 <!-- ═══ LOADING ═══ -->
 <div id="loading-overlay">
   <div class="load-logo-wrap">
-    <div class="load-logo">LunesFC</div>
+    <div class="load-logo">La Pechera</div>
     <div class="load-tagline">El FIFA del Fútbol Amateur</div>
   </div>
   <div class="load-ring"></div>
@@ -1364,7 +1364,7 @@ canvas.radar-canvas{display:block;margin:0 auto}
 <div id="auth-screen" class="screen">
   <div class="auth-logo">
     <span class="auth-ball">⚽</span>
-    <div class="brand">LunesFC</div>
+    <div class="brand">La Pechera</div>
     <div class="brand-badge">✦ UNICORN EDITION ✦</div>
     <div class="tagline">El FIFA del Fútbol Amateur</div>
   </div>
@@ -1439,7 +1439,7 @@ canvas.radar-canvas{display:block;margin:0 auto}
   <button class="btn-logout" onclick="doLogout()">Salir</button>
   <div style="overflow-y:auto;flex:1">
     <div class="group-hero">
-      <div class="group-hero-title">LunesFC</div>
+      <div class="group-hero-title">La Pechera</div>
       <div class="group-hero-sub">Seleccioná o creá tu grupo</div>
       <div class="group-welcome-chip">
         <div class="group-welcome-avatar" id="group-welcome-avatar">?</div>
@@ -1656,7 +1656,7 @@ window.doRegister = async function(){
       elo:1000, xp:0, level:1, mvpCount:0,
       createdAt:Date.now()
     });
-    showToast('🎉 Bienvenido a LunesFC!');
+    showToast('🎉 Bienvenido a La Pechera!');
   } catch(e){
     const msgs = { 'auth/email-already-in-use':'Email ya registrado', 'auth/invalid-email':'Email inválido' };
     showErr(err, msgs[e.code]||e.message);
