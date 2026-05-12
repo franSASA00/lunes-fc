@@ -2198,7 +2198,11 @@ async function renderAsistencia(el){
               <div class="attendance-meta">${POSITIONS[u.posicion]||'Jugador'} · OVR <b style="color:${overallColor(overall)}">${overall||'—'}</b> · ${eloRank.icon}</div>
             </div>
           </div>
-          ${isSelf?`<button class="attendance-toggle ${btnCls}" onclick="toggleMyAttendance()">${btnTxt}</button>`:`<span class="attendance-toggle ${btnCls}">${btnTxt}</span>`}
+          ${isSelf
+  ? estaBloquadaAsistencia()
+    ? `<div style="display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:20px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);color:var(--tx3);font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase">🔒 ${horaCorte(currentGroup.proximaFecha.hora)}hs</div>`
+    : `<button class="attendance-toggle ${btnCls}" onclick="toggleMyAttendance()">${btnTxt}</button>`
+  : `<span class="attendance-toggle ${btnCls}">${btnTxt}</span>`}
         </div>`;
       }).join('')}
     </div>
