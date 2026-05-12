@@ -675,3 +675,12 @@ function getPlayerStats(uid,gid){
 
 ## ENTREGABLE:
 Genera un archivo index.html completo con todas las funcionalidades integradas, que funcione sin necesidad de servidor adicional (solo abriendo el archivo o subiéndolo a GitHub Pages). Incluye CSS moderno, JavaScript vanilla (sin frameworks pesados) y comentarios explicativos en el código.
+
+EL ULTIMO PASO PENDIENTE.
+3. JS — reemplazar window.addGoal y agregar funciones nuevas, y actualizar saveMatch y renderHistorial. Los cambios están marcados claramente:
+En lugar de darte los diffs línea a línea (el archivo es grande), te doy el bloque JS completo modificado con todas las funciones afectadas. Hay 4 funciones que cambian:
+
+addGoal → ahora abre el scorer picker
+saveMatch → agrega goleadores al historial
+renderHistorial → muestra goles en el historial y ranking de goleadores
+openPlayerDetail → muestra total de goles
