@@ -2329,7 +2329,27 @@ window.borrarFecha = async function(){
   currentGroup.proximaFecha = null;
   showTab('asistencia');
 };
-   
+
+// ── Devuelve true si ya pasó el corte de 1 hora antes del partido ──
+function estaBloquadaAsistencia() {
+  const fecha = currentGroup?.proximaFecha;
+  if (!fecha || fecha.cancelada) return false;
+
+  // fecha.hora viene como "20:00" (formato HH:MM del input type="time")
+  const [hh, mm] = fecha.hora.split(':').map(Number);
+
+  // Construimos la fecha del partido en el día correcto
+  const now = new Date();
+  const partido = new Date();
+  partido.setHours(hh, mm, 0, 0);
+
+  // Si la hora ya pasó hoy, el partido es mañana
+  if (partido < now) return true;
+
+  const diffMinutos = (partido - now) / 1000 / 60;
+  return diffMinutos <= 60;
+}
+
 window.toggleMyAttendance = async function(){
   const att = await getAttendance();
   const cur = att[currentUser.uid]||false;
