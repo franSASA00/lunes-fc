@@ -2238,12 +2238,16 @@ window.eliminarMiembro = async function(uid){
   showTab('jugadores');
 };
 
-async function checkFechaPopup(){
+async function checkFechaPopup() {
   const fecha = currentGroup.proximaFecha;
-  if(!fecha || fecha.cancelada) return;
+  if (!fecha || fecha.cancelada) return;
+
+  // Si ya pasó el corte, no mostramos el popup
+  if (estaBloquadaAsistencia()) return;
+
   const att = await getAttendance();
   const yaConfirmo = att[currentUser.uid] !== undefined;
-  if(yaConfirmo) return;
+  if (yaConfirmo) return;
 
   // Crear popup
   const overlay = document.createElement('div');
