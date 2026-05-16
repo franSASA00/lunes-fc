@@ -3289,36 +3289,94 @@ async function renderHistorial(el){
       </div>
     </div>
 
-    <!-- ── PROFILE HERO ── -->
-    <div class="stats-hero">
-      <div class="stats-hero-top">
-        <div class="stats-hero-avatar" style="background:${avatarGradient(currentUser.uid)}">
-          ${currentUser.nombre[0]}${currentUser.apellido[0]}
-        </div>
-        <div class="stats-hero-info">
-          <div class="stats-hero-name">${currentUser.nombre} ${currentUser.apellido}</div>
-          <div class="stats-hero-meta">${POSITIONS[currentUser.posicion]||'Jugador'} · ${eloRank.icon} ${eloRank.name}</div>
-          <div class="stats-hero-meta" style="margin-top:4px">
+    <!-- ── PROFILE HERO FIFA ── -->
+    <div style="
+      background:linear-gradient(135deg,rgba(0,212,255,.08),rgba(0,119,255,.04));
+      border:1px solid rgba(0,212,255,.2);border-radius:20px;
+      padding:20px;margin-bottom:14px;position:relative;overflow:hidden;
+    ">
+      <!-- Top shimmer bar -->
+      <div style="position:absolute;top:0;left:0;right:0;height:3px;
+        background:linear-gradient(90deg,var(--purple),var(--cyan),var(--purple));
+        background-size:200% 100%;animation:shimmerBar 3s ease infinite"></div>
+
+      <!-- Header row -->
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px">
+        <div style="
+          width:68px;height:68px;border-radius:50%;flex-shrink:0;
+          background:${avatarGradient(currentUser.uid)};
+          display:flex;align-items:center;justify-content:center;
+          font-family:'Bebas Neue',sans-serif;font-size:28px;color:#000;
+          box-shadow:0 0 0 3px rgba(0,212,255,.2),0 8px 24px rgba(0,0,0,.4);
+        ">${currentUser.nombre[0]}${currentUser.apellido[0]}</div>
+        <div style="flex:1">
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase">${currentUser.nombre} ${currentUser.apellido}</div>
+          <div style="font-size:12px;color:var(--tx3);margin-top:3px">${POSITIONS[currentUser.posicion]||'Jugador'} · ${eloRank.icon} ${eloRank.name}</div>
+          <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap">
             <span class="chip chip-purple" style="font-size:10px">ELO ${currentUser.elo||1000}</span>
-            &nbsp;<span class="chip chip-blue" style="font-size:10px">Nv.${currentUser.level||1} · ${currentUser.xp||0} XP</span>
+            <span class="chip chip-blue" style="font-size:10px">Nv.${currentUser.level||1} · ${currentUser.xp||0} XP</span>
           </div>
         </div>
-        <div class="stats-hero-overall" style="color:${ovrCol};filter:drop-shadow(0 0 12px ${ovrCol==='var(--gold)'?'rgba(255,214,0,.4)':ovrCol==='var(--green)'?'rgba(0,230,118,.4)':'rgba(0,212,255,.3)'})">${overall||'—'}</div>
+        <!-- Overall grande -->
+        <div style="text-align:center;flex-shrink:0">
+          <div style="
+            font-family:'Bebas Neue',sans-serif;font-size:80px;line-height:.9;
+            color:${ovrCol};
+            filter:drop-shadow(0 0 20px ${ovrCol==='var(--gold)'?'rgba(255,214,0,.5)':ovrCol==='var(--green)'?'rgba(0,230,118,.4)':'rgba(0,212,255,.4)'});
+          ">${overall||'—'}</div>
+          <div style="font-size:9px;color:var(--tx3);letter-spacing:2px;text-transform:uppercase">OVR</div>
+        </div>
       </div>
-      <div class="stats-skill-bars">
+
+      <!-- Barras de skills estilo FIFA -->
+      <div style="display:flex;flex-direction:column;gap:8px">
         ${SKILLS.map(s=>{
-          const v = stats[s]||0;
-          const col = skillBarColor(v);
-          return `<div class="stats-skill-row">
-            <div class="stats-skill-name">${s}</div>
-            <div class="stats-skill-track">
-              <div class="stats-skill-fill" style="width:${v}%;background:${col}"></div>
+          const val = stats[s]||0;
+          const col = val>=80?'var(--gold)':val>=65?'var(--green)':val>=40?'var(--cyan)':'var(--orange)';
+          const width = val+'%';
+          return `<div style="display:flex;align-items:center;gap:10px">
+            <div style="font-size:10px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--tx3);width:72px;flex-shrink:0">${s}</div>
+            <div style="flex:1;height:6px;background:rgba(255,255,255,.07);border-radius:3px;overflow:hidden">
+              <div style="height:100%;width:${width};background:${col};border-radius:3px;transition:width .7s cubic-bezier(.4,0,.2,1);box-shadow:0 0 6px ${col}"></div>
             </div>
-            <div class="stats-skill-val" style="color:${col}">${v||'—'}</div>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;color:${col};min-width:26px;text-align:right">${val||'—'}</div>
           </div>`;
         }).join('')}
       </div>
     </div>
+
+    <!-- ── QUICK STATS FIFA CARDS ── -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px">
+      ${[
+        {val:myMatches, lbl:'Partidos', icon:'⚽', col:'var(--cyan)'},
+        {val:myWins,    lbl:'Victorias', icon:'🏆', col:'var(--green)'},
+        {val:currentUser.mvpCount||0, lbl:'MVPs', icon:'⭐', col:'var(--gold)'},
+      ].map(item=>`
+        <div style="
+          background:var(--sf2);border:1px solid var(--br);border-radius:14px;
+          padding:14px 8px;text-align:center;position:relative;overflow:hidden;
+        ">
+          <div style="position:absolute;top:0;left:0;right:0;height:2px;background:${item.col};opacity:.5"></div>
+          <div style="font-size:22px;margin-bottom:4px">${item.icon}</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:36px;color:${item.col};line-height:1">${item.val}</div>
+          <div style="font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:1px;margin-top:3px">${item.lbl}</div>
+        </div>`).join('')}
+    </div>
+
+    <!-- ── XP BAR ── -->
+    <div class="xp-bar" style="margin-bottom:16px">
+      <div class="xp-bar-top">
+        <div class="xp-bar-label">⚡ Nivel ${currentUser.level||1}</div>
+        <div class="xp-bar-val">${currentUser.xp||0} / ${((currentUser.level||1)*500)} XP</div>
+      </div>
+      <div class="xp-track">
+        <div class="xp-fill" style="width:${Math.min(100,((currentUser.xp||0)%500)/5)}%"></div>
+      </div>
+    </div>
+  `;
+
+  // ── Después pegá el resto: logros, goleadores, historial ──
+  // (todo lo que estaba después del XP bar, sin cambios)
 
     <!-- ── QUICK STATS ── -->
     <div class="stats-grid">
