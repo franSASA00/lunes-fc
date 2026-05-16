@@ -545,11 +545,13 @@ input,select{font-family:inherit}
 .modal-handle{width:40px;height:4px;background:var(--br2);border-radius:2px;margin:14px auto 0}
 .modal-body{padding:20px 20px 40px}
 .modal-close{
-  position:absolute;top:16px;right:16px;
+  position:sticky;top:0;float:right;
   color:var(--tx3);font-size:20px;
   width:34px;height:34px;
   background:var(--sf2);border-radius:50%;
   display:flex;align-items:center;justify-content:center;
+  margin-left:auto;margin-bottom:-34px;
+  z-index:10;cursor:pointer;
 }
 
 /* ── PLAYER DETAIL HEADER ── */
