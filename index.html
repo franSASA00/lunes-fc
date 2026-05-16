@@ -77,37 +77,141 @@ input,select{font-family:inherit}
 .screen.active{display:flex}
 
 /* ══════════════════════════════════════════════════════
-   LOADING SCREEN — Cinematic intro
+   LOADING SCREEN — Cinematic CSS
 ══════════════════════════════════════════════════════ */
 #loading-overlay{
   position:fixed;inset:0;
   background:var(--bg);
   display:flex;flex-direction:column;align-items:center;justify-content:center;
-  z-index:999;transition:opacity .5s ease;
+  z-index:999;transition:opacity .6s ease;
+  overflow:hidden;
 }
 #loading-overlay.hidden{opacity:0;pointer-events:none}
-.load-logo-wrap{position:relative;margin-bottom:12px}
+
+/* Campo de fútbol animado de fondo */
+.load-field{
+  position:absolute;inset:0;
+  display:flex;align-items:center;justify-content:center;
+  opacity:.07;
+}
+.load-field svg{width:100%;height:100%;max-width:500px}
+
+/* Partículas */
+.load-particles{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+.load-particle{
+  position:absolute;
+  width:2px;height:2px;border-radius:50%;
+  background:var(--cyan);
+  animation:particleFloat linear infinite;
+  opacity:0;
+}
+@keyframes particleFloat{
+  0%{transform:translateY(100vh) translateX(0);opacity:0}
+  10%{opacity:.6}
+  90%{opacity:.3}
+  100%{transform:translateY(-20px) translateX(var(--dx));opacity:0}
+}
+
+/* Logo principal */
+.load-logo-wrap{
+  position:relative;z-index:2;
+  display:flex;flex-direction:column;align-items:center;
+  animation:loadLogoIn .8s cubic-bezier(.22,1,.5,1) .2s both;
+}
+@keyframes loadLogoIn{
+  from{opacity:0;transform:translateY(30px) scale(.85)}
+  to{opacity:1;transform:translateY(0) scale(1)}
+}
+
+/* Pelota animada */
+.load-ball{
+  font-size:52px;margin-bottom:16px;
+  animation:ballDrop .6s cubic-bezier(.22,1.4,.5,1) .1s both, ballBounce 2.5s ease-in-out 1s infinite;
+  filter:drop-shadow(0 0 24px rgba(0,212,255,.4));
+}
+@keyframes ballDrop{
+  from{transform:translateY(-60px) scale(.6);opacity:0}
+  to{transform:translateY(0) scale(1);opacity:1}
+}
+@keyframes ballBounce{
+  0%,100%{transform:translateY(0) scale(1)}
+  50%{transform:translateY(-10px) scale(1.05)}
+}
+
 .load-logo{
-  font-family:'Bebas Neue',sans-serif;font-size:64px;letter-spacing:6px;
-  background:linear-gradient(135deg,var(--cyan),#0055ff,var(--cyan));
+  font-family:'Bebas Neue',sans-serif;font-size:72px;letter-spacing:8px;line-height:1;
+  background:linear-gradient(135deg,#fff 0%,var(--cyan) 50%,#0055ff 100%);
   background-size:200% 200%;
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;
-  animation:logoShimmer 2s ease infinite;
+  animation:logoShimmer 2s ease infinite, logoReveal .6s ease .4s both;
+}
+@keyframes logoReveal{
+  from{opacity:0;letter-spacing:20px}
+  to{opacity:1;letter-spacing:8px}
 }
 @keyframes logoShimmer{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
-.load-ring{
-  width:48px;height:48px;
-  border:2px solid var(--br2);
-  border-top-color:var(--cyan);
-  border-radius:50%;
-  animation:spin .8s linear infinite;
-  margin-top:24px;
-}
-.load-tagline{font-size:11px;color:var(--tx3);letter-spacing:4px;text-transform:uppercase;margin-top:8px}
 
-   @keyframes fadeIn{from{opacity:0}to{opacity:1}}
-   @keyframes slideUp{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
-   @keyframes spin{to{transform:rotate(360deg)}}
+.load-tagline{
+  font-size:11px;color:var(--tx3);letter-spacing:5px;text-transform:uppercase;
+  margin-top:8px;
+  animation:fadeIn .5s ease .8s both;
+}
+.load-badge{
+  margin-top:12px;
+  display:inline-block;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  color:#000;font-size:9px;font-weight:800;letter-spacing:2px;text-transform:uppercase;
+  padding:4px 12px;border-radius:4px;
+  animation:fadeIn .5s ease 1s both;
+}
+
+/* Barra de progreso */
+.load-progress-wrap{
+  position:relative;z-index:2;
+  width:180px;margin-top:40px;
+  animation:fadeIn .4s ease .6s both;
+}
+.load-progress-track{
+  height:2px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden;
+}
+.load-progress-fill{
+  height:100%;width:0%;border-radius:2px;
+  background:linear-gradient(90deg,var(--cyan),#0055ff);
+  box-shadow:0 0 8px var(--cyan);
+  animation:loadProgress 1.8s cubic-bezier(.4,0,.2,1) .4s both;
+}
+@keyframes loadProgress{
+  0%{width:0%}
+  60%{width:75%}
+  80%{width:88%}
+  100%{width:100%}
+}
+.load-progress-text{
+  font-size:10px;color:var(--tx3);letter-spacing:2px;text-transform:uppercase;
+  text-align:center;margin-top:10px;
+  animation:loadingDots 1.5s ease infinite .8s;
+}
+@keyframes loadingDots{
+  0%,100%{opacity:.4}
+  50%{opacity:1}
+}
+
+/* Líneas de scan (efecto tech) */
+.load-scanline{
+  position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,212,255,.015) 2px,
+    rgba(0,212,255,.015) 4px
+  );
+  animation:scanMove 8s linear infinite;
+}
+@keyframes scanMove{
+  0%{background-position:0 0}
+  100%{background-position:0 100px}
+}
 
 /* ══════════════════════════════════════════════════════
    AUTH SCREEN
