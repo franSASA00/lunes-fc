@@ -3341,12 +3341,9 @@ async function renderHistorial(el){
       border:1px solid rgba(0,212,255,.2);border-radius:20px;
       padding:20px;margin-bottom:14px;position:relative;overflow:hidden;
     ">
-      <!-- Top shimmer bar -->
       <div style="position:absolute;top:0;left:0;right:0;height:3px;
         background:linear-gradient(90deg,var(--purple),var(--cyan),var(--purple));
         background-size:200% 100%;animation:shimmerBar 3s ease infinite"></div>
-
-      <!-- Header row -->
       <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px">
         <div style="
           width:68px;height:68px;border-radius:50%;flex-shrink:0;
@@ -3363,7 +3360,6 @@ async function renderHistorial(el){
             <span class="chip chip-blue" style="font-size:10px">Nv.${currentUser.level||1} · ${currentUser.xp||0} XP</span>
           </div>
         </div>
-        <!-- Overall grande -->
         <div style="text-align:center;flex-shrink:0">
           <div style="
             font-family:'Bebas Neue',sans-serif;font-size:80px;line-height:.9;
@@ -3373,17 +3369,14 @@ async function renderHistorial(el){
           <div style="font-size:9px;color:var(--tx3);letter-spacing:2px;text-transform:uppercase">OVR</div>
         </div>
       </div>
-
-      <!-- Barras de skills estilo FIFA -->
       <div style="display:flex;flex-direction:column;gap:8px">
         ${SKILLS.map(s=>{
           const val = stats[s]||0;
           const col = val>=80?'var(--gold)':val>=65?'var(--green)':val>=40?'var(--cyan)':'var(--orange)';
-          const width = val+'%';
           return `<div style="display:flex;align-items:center;gap:10px">
             <div style="font-size:10px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--tx3);width:72px;flex-shrink:0">${s}</div>
             <div style="flex:1;height:6px;background:rgba(255,255,255,.07);border-radius:3px;overflow:hidden">
-              <div style="height:100%;width:${width};background:${col};border-radius:3px;transition:width .7s cubic-bezier(.4,0,.2,1);box-shadow:0 0 6px ${col}"></div>
+              <div style="height:100%;width:${val}%;background:${col};border-radius:3px;box-shadow:0 0 6px ${col}"></div>
             </div>
             <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;color:${col};min-width:26px;text-align:right">${val||'—'}</div>
           </div>`;
@@ -3391,7 +3384,7 @@ async function renderHistorial(el){
       </div>
     </div>
 
-    <!-- ── QUICK STATS FIFA CARDS ── -->
+    <!-- ── QUICK STATS FIFA ── -->
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px">
       ${[
         {val:myMatches, lbl:'Partidos', icon:'⚽', col:'var(--cyan)'},
@@ -3419,7 +3412,6 @@ async function renderHistorial(el){
         <div class="xp-fill" style="width:${Math.min(100,((currentUser.xp||0)%500)/5)}%"></div>
       </div>
     </div>
-  `;
 
   // ── Después pegá el resto: logros, goleadores, historial ──
   // (todo lo que estaba después del XP bar, sin cambios)
