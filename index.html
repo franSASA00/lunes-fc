@@ -2530,13 +2530,28 @@ function renderTeamsResult(){
             <div class="team-name" style="color:${idx===0?'var(--cyan)':'var(--orange)'}">${idx===0?'⚡ A':'🔥 B'}</div>
             <div class="team-ovr" style="color:${overallColor(team.avg)}">${team.avg}</div>
           </div>
-          ${team.players.map((u,i)=>`
-            <div class="team-player">
-              <div class="team-player-num">${i+1}</div>
-              <div class="team-player-name">${u.nombre} ${u.apellido[0]}.</div>
-              <div class="team-player-ovr">${u.ovr||'—'}</div>
-            </div>`).join('')}
-        </div>`).join('')}
+          ${team.players.map((u,i)=>{
+  const posBadge = {
+    DEL: {label:'DEL', color:'rgba(255,23,68,.85)',  border:'rgba(255,23,68,.4)'},
+    MED: {label:'MED', color:'rgba(0,230,118,.85)',  border:'rgba(0,230,118,.4)'},
+    DEF: {label:'DEF', color:'rgba(0,212,255,.85)',  border:'rgba(0,212,255,.4)'},
+    ARQ: {label:'ARQ', color:'rgba(255,214,0,.9)',   border:'rgba(255,214,0,.4)'},
+  }[u.posicion] || {label:'JUG', color:'rgba(160,180,204,.7)', border:'rgba(160,180,204,.3)'};
+  return `<div class="team-player">
+    <div class="team-player-num">${i+1}</div>
+    <div class="team-player-name" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+      ${u.nombre} ${u.apellido[0]}.
+      <span style="
+        font-size:8px;font-weight:800;letter-spacing:.8px;
+        padding:2px 5px;border-radius:4px;
+        background:${posBadge.color};
+        border:1px solid ${posBadge.border};
+        color:#000;line-height:1.4;flex-shrink:0;
+      ">${posBadge.label}</span>
+    </div>
+    <div class="team-player-ovr">${u.ovr||'—'}</div>
+  </div>`;
+}).join('')}
     </div>
 
     ${diff>5?`<div style="font-size:12px;color:var(--orange);text-align:center;margin-bottom:8px">⚠️ Diferencia de ${diff} puntos. Considerá redibujar.</div>`:''}
