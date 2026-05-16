@@ -2100,6 +2100,14 @@ window.openPlayerDetail = async function(uid){
   const col = overallColor(overall);
   const eloRank = getEloRank(u.elo||1000);
 
+  // Total de goles del jugador en el historial del grupo
+  const histSnap = await getDoc(doc(db,'groups', currentGroup.id));
+  const histData = histSnap.data();
+  const totalGoles = (histData.history||[]).reduce((total, m) => {
+    const scored = (m.scorers||[]).find(s=>s.uid===uid);
+    return total + (scored ? scored.goals : 0);
+  }, 0);
+
   document.getElementById('player-modal-body').innerHTML = `
     <div style="position:relative">
       <button class="modal-close" onclick="closeModal('player-modal')">✕</button>
@@ -2113,10 +2121,10 @@ window.openPlayerDetail = async function(uid){
         <span class="chip chip-blue">${raterCount} calificación(es)</span>
         <span class="chip chip-purple">${eloRank.icon} ${eloRank.name}</span>
         ${u.mvpCount>0?`<span class="chip chip-gold">⭐ ${u.mvpCount} MVP(s)</span>`:''}
+        ${totalGoles>0?`<span class="chip chip-gold">⚽ ${totalGoles} gol${totalGoles!==1?'es':''}</span>`:''}
         ${isSelf?'<span class="chip chip-orange">● Vos</span>':''}
       </div>
     </div>
-
     <div class="elo-display">
       <div class="elo-left">
         <div class="elo-icon">${eloRank.icon}</div>
@@ -2127,7 +2135,6 @@ window.openPlayerDetail = async function(uid){
       </div>
       <div class="elo-rank ${eloRank.cls}">${eloRank.name}</div>
     </div>
-
     <div class="xp-bar">
       <div class="xp-bar-top">
         <div class="xp-bar-label">⚡ Nivel ${u.level||1}</div>
@@ -2135,7 +2142,6 @@ window.openPlayerDetail = async function(uid){
       </div>
       <div class="xp-track"><div class="xp-fill" style="width:${Math.min(100,((u.xp||0)%500)/5)}%"></div></div>
     </div>
-
     <div class="modal-section">
       <div class="modal-section-title">Atributos</div>
       ${SKILLS.map(skill=>{
@@ -2147,16 +2153,11 @@ window.openPlayerDetail = async function(uid){
         </div>`;
       }).join('')}
     </div>
-
     ${!isSelf?`<button class="btn-primary" style="margin-top:8px" onclick="closeModal('player-modal');pendingRateUid='${uid}';showTab('calificar')">⭐ CALIFICAR A ${u.nombre.toUpperCase()}</button>`:''}
   `;
   openModal('player-modal');
 };
-
-window.copyCode = function(code){
-  navigator.clipboard?.writeText(code)?.then(()=>showToast('📋 Código copiado: '+code))||showToast('Código: '+code);
-};
-
+   
 /* ══════════════════════════════════════════════
    ASISTENCIA — Match Screen
 ══════════════════════════════════════════════ */
