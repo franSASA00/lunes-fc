@@ -1510,11 +1510,36 @@ canvas.radar-canvas{display:block;margin:0 auto}
 
 <!-- ═══ LOADING ═══ -->
 <div id="loading-overlay">
+  <div class="load-scanline"></div>
+  <div class="load-field">
+    <svg viewBox="0 0 400 260" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="2" y="2" width="396" height="256" rx="4" stroke="white" stroke-width="2"/>
+      <line x1="200" y1="2" x2="200" y2="258" stroke="white" stroke-width="1.5"/>
+      <circle cx="200" cy="130" r="40" stroke="white" stroke-width="1.5"/>
+      <circle cx="200" cy="130" r="3" fill="white"/>
+      <rect x="2" y="85" width="50" height="90" stroke="white" stroke-width="1.5"/>
+      <rect x="348" y="85" width="50" height="90" stroke="white" stroke-width="1.5"/>
+      <rect x="2" y="105" width="22" height="50" stroke="white" stroke-width="1.5"/>
+      <rect x="376" y="105" width="22" height="50" stroke="white" stroke-width="1.5"/>
+      <path d="M2 2 Q40 2 40 40" stroke="white" stroke-width="1.5" fill="none"/>
+      <path d="M398 2 Q360 2 360 40" stroke="white" stroke-width="1.5" fill="none"/>
+      <path d="M2 258 Q40 258 40 220" stroke="white" stroke-width="1.5" fill="none"/>
+      <path d="M398 258 Q360 258 360 220" stroke="white" stroke-width="1.5" fill="none"/>
+    </svg>
+  </div>
+  <div class="load-particles" id="load-particles"></div>
   <div class="load-logo-wrap">
+    <div class="load-ball">⚽</div>
     <div class="load-logo">La Pechera</div>
     <div class="load-tagline">El FIFA del Fútbol Amateur</div>
+    <div class="load-badge">✦ UNICORN EDITION ✦</div>
   </div>
-  <div class="load-ring"></div>
+  <div class="load-progress-wrap">
+    <div class="load-progress-track">
+      <div class="load-progress-fill"></div>
+    </div>
+    <div class="load-progress-text">Cargando</div>
+  </div>
 </div>
 
 <!-- ═══ AUTH ═══ -->
