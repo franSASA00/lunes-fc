@@ -2715,10 +2715,106 @@ window.resetTimer = function(){
   showTab('live');
 };
 
+// Abre el picker de goleador para el equipo indicado
 window.addGoal = function(team){
+  if(!currentTeams) return;
+  openScorerModal(team);
+};
+
+// Llena el modal con los jugadores del equipo y lo abre
+function openScorerModal(team){
+  const teamData = currentTeams[team];
+  const titleEl = document.getElementById('scorer-title');
+  const gridEl  = document.getElementById('scorer-grid');
+  if(!titleEl || !gridEl) return;
+
+  titleEl.innerHTML = `<span style="color:${team===0?'var(--cyan)':'var(--orange)'}">⚽ Equipo ${team===0?'A':'B'}</span> — ¿Quién metió el gol?`;
+
+  gridEl.innerHTML = teamData.players.map(p => `
+    <button class="scorer-btn ${team===1?'team-b':''}" onclick="confirmGoal('${p.uid}',${team})">
+      <div class="scorer-btn-avatar" style="background:${avatarGradient(p.uid)}">${p.nombre[0]}${p.apellido[0]}</div>
+      <div>
+        <div class="scorer-btn-name">${p.nombre} ${p.apellido}</div>
+        <div class="scorer-btn-ovr">OVR ${p.ovr||'—'}</div>
+      </div>
+    </button>`).join('');
+
+  // Guardamos el equipo pendiente para usarlo en confirmGoal
+  document.getElementById('scorer-modal').dataset.pendingTeam = team;
+  document.getElementById('scorer-modal').classList.add('open');
+}
+
+// Se llama cuando se elige un goleador (o null = sin asignar)
+window.confirmGoal = function(scorerUid, team){
+  // Si team no viene como parámetro, lo leemos del dataset
+  if(team === undefined){
+    team = parseInt(document.getElementById('scorer-modal').dataset.pendingTeam);
+  }
+  document.getElementById('scorer-modal').classList.remove('open');
+
   if(team===0) liveMatch.scoreA++;
   else liveMatch.scoreB++;
-  liveMatch.events.push({ time:liveMatch.timer, icon:'⚽', text:'¡Goooool!', team });
+
+  const scorer = scorerUid
+    ? groupMembers.find(u=>u.uid===scorerUid)
+    : null;
+  const scorerName = scorer ? `${scorer.nombre} ${scorer.apellido}` : null;
+
+  liveMatch.events.push({
+    time:   liveMatch.timer,
+    icon:   '⚽',
+    text:   scorerName ? `¡Gol de ${scorerName}!` : '¡Goooool!',
+    team,
+    scorerUid: scorerUid || null,
+    scorerName: scorerName || null,
+  });
+
+  // Actualizar DOM del live sin re-render completo
+  const sbEl = document.getElementById('live-scoreboard');
+  if(sbEl){
+    const sA=liveMatch.scoreA, sB=liveMatch.scoreB;
+    const aLeads=sA>sB, bLeads=sB>sA;
+    const scoreAEl=document.getElementById('sb-score-a');
+    const scoreBEl=document.getElementById('sb-score-b');
+    if(scoreAEl) scoreAEl.textContent=sA;
+    if(scoreBEl) scoreBEl.textContent=sB;
+    const popEl = team===0?scoreAEl:scoreBEl;
+    if(popEl){ popEl.classList.remove('score-pop'); void popEl.offsetWidth; popEl.classList.add('score-pop'); }
+    ['.side-a','.side-b'].forEach((sel,i)=>{
+      const el=sbEl.querySelector(sel); if(!el) return;
+      el.classList.remove('leading','trailing');
+      const leads=i===0?aLeads:bLeads, trails=i===0?bLeads:aLeads;
+      if(leads) el.classList.add('leading');
+      else if(trails) el.classList.add('trailing');
+    });
+    sbEl.classList.remove('goal-flash'); void sbEl.offsetWidth; sbEl.classList.add('goal-flash');
+    const halfEl=sbEl.querySelector('.live-sb-half');
+    if(halfEl) halfEl.textContent=liveMatch.active?'EN JUEGO':liveMatch.timer>0?'PAUSA':'ESPERA';
+    const timeline=document.getElementById('live-timeline');
+    if(timeline){
+      if(timeline.querySelector('[style*="Sin eventos"]')) timeline.innerHTML='';
+      const ev=liveMatch.events[liveMatch.events.length-1];
+      const item=document.createElement('div');
+      item.className='event-item';
+      item.innerHTML=`
+        <div class="event-time">${formatTimer(ev.time)}</div>
+        <div class="event-icon">⚽</div>
+        <div>
+          <div class="event-text">${ev.text}</div>
+          <div class="event-team" style="color:${team===0?'var(--cyan)':'var(--orange)'}">${team===0?'Equipo A':'Equipo B'}</div>
+        </div>`;
+      timeline.insertBefore(item, timeline.firstChild);
+    }
+  } else {
+    showTab('live');
+  }
+
+  showGoalBanner(team, liveMatch.scoreA, liveMatch.scoreB, scorerName);
+};
+
+window.closeScorerModal = function(){
+  document.getElementById('scorer-modal').classList.remove('open');
+};
 
   // If live tab is active, update DOM in-place (no full re-render)
   const sbEl = document.getElementById('live-scoreboard');
