@@ -402,11 +402,22 @@ input,select{font-family:inherit}
 /* ══════════════════════════════════════════════════════
    MAIN SCREEN
 ══════════════════════════════════════════════════════ */
-#main-screen{background:url('./bg.jpg') center center / cover no-repeat fixed}
-.main-content{
-  flex:1;overflow-y:auto;overflow-x:hidden;
-  padding:16px 16px calc(var(--th) + var(--safe) + 16px);
-  -webkit-overflow-scrolling:touch;
+#main-screen{
+  background:var(--bg);
+  position:relative;
+}
+#main-screen::before{
+  content:'';
+  position:fixed;inset:0;
+  background:url('./bg.jpg') center center / cover no-repeat;
+  opacity:0.08;
+  pointer-events:none;
+  z-index:0;
+}
+#main-screen .main-content,
+#main-screen .tab-bar{
+  position:relative;
+  z-index:1;
 }
 
 /* ── TAB BAR — Glassmorphism v2 ── */
