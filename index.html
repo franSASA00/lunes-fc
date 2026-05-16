@@ -2112,7 +2112,7 @@ window.openPlayerDetail = async function(uid){
 
   document.getElementById('player-modal-body').innerHTML = `
     <button class="modal-close" onclick="closeModal('player-modal')">✕</button>
-    
+        
     <div class="detail-hero">
       <div class="player-card-avatar" style="width:64px;height:64px;font-size:26px;margin:0 auto 12px;background:${avatarGradient(uid)}">${u.nombre[0]}${u.apellido[0]}</div>
       <div class="detail-overall" style="color:${col}">${overall||'—'}</div>
