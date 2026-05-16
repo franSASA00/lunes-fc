@@ -2682,7 +2682,7 @@ function showGoalBanner(team, sA, sB){
       <div class="goal-banner-ball">⚽</div>
       <div class="goal-banner-text">
         <div class="goal-banner-title">¡GOOOOL!</div>
-        <div class="goal-banner-sub">Equipo ${team===0?'A':'B'} anota</div>
+        <div class="goal-banner-sub">${scorerName ? scorerName : 'Equipo '+(team===0?'A':'B')}</div>
       </div>
       <div class="goal-banner-score">${sA} — ${sB}</div>
     </div>`;
