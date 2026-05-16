@@ -2821,8 +2821,14 @@ window.confirmGoal = function(scorerUid, team){
       const ev=liveMatch.events[liveMatch.events.length-1];
       const item=document.createElement('div');
       item.className='event-item';
-      item.innerHTML=`<div class="event-time">${formatTimer(ev.time)}</div><div class="event-icon">⚽</div><div><div class="event-text">${ev.text}</div>
-      timeline.insertBefore(item,timeline.firstChild);
+      item.innerHTML=`
+  <div class="event-time">${formatTimer(ev.time)}</div>
+  <div class="event-icon">⚽</div>
+  <div>
+    <div class="event-text">${ev.text}</div>
+    <div class="event-team" style="color:${team===0?'var(--cyan)':'var(--orange)'}">${team===0?'Equipo A':'Equipo B'}</div>
+  </div>`;
+timeline.insertBefore(item, timeline.firstChild);
     }
   } else {
     showTab('live');
