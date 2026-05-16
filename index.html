@@ -2552,22 +2552,39 @@ window.saveMatch = async function(){
   const snap = await getDoc(ref);
   const g = snap.data();
   const history = g.history||[];
+
+  // Construir lista de goleadores desde los eventos
+  const scorers = {};
+  liveMatch.events.forEach(ev => {
+    if(!ev.scorerUid) return;
+    if(!scorers[ev.scorerUid]){
+      scorers[ev.scorerUid] = {
+        uid: ev.scorerUid,
+        name: ev.scorerName,
+        goals: 0,
+        team: ev.team,
+      };
+    }
+    scorers[ev.scorerUid].goals++;
+  });
+
   history.unshift({
-    date:new Date().toLocaleDateString('es-AR',{weekday:'long',day:'numeric',month:'long'}),
-    timestamp:Date.now(),
+    date: new Date().toLocaleDateString('es-AR',{weekday:'long',day:'numeric',month:'long'}),
+    timestamp: Date.now(),
     scoreA: liveMatch.scoreA||0,
     scoreB: liveMatch.scoreB||0,
     events: liveMatch.events||[],
+    scorers: Object.values(scorers), // ← NUEVO
     teams: currentTeams.map(t=>({
-      avg:t.avg,
-      players:t.players.map(p=>({uid:p.uid,nombre:p.nombre,apellido:p.apellido,ovr:p.ovr}))
+      avg: t.avg,
+      players: t.players.map(p=>({uid:p.uid,nombre:p.nombre,apellido:p.apellido,ovr:p.ovr}))
     }))
   });
+
   await updateDoc(ref, {history});
   currentGroup = {...currentGroup, history};
   showToast('✓ ¡Partido guardado!');
   currentTeams = null;
-  // Reset live match
   liveMatch.scoreA=0; liveMatch.scoreB=0; liveMatch.events=[];
 };
 
