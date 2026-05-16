@@ -3122,6 +3122,27 @@ window.submitRating = async function(uid){
   showTab('jugadores');
 };
 
+${golesRanking.length ? `
+<div class="section-title">⚽ Goleadores del Grupo</div>
+<div class="leaderboard" style="margin-bottom:16px">
+  ${golesRanking.map(([uid, data], i) => {
+    const medals = ['🥇','🥈','🥉'];
+    const rankCls = ['r1','r2','r3'][i] || '';
+    const u = groupMembers.find(m=>m.uid===uid);
+    return `<div class="leaderboard-item ${i<3?'top'+(i+1):''}">
+      <div class="lb-rank ${rankCls}">${medals[i]||i+1}</div>
+      <div class="lb-avatar" style="background:${u?avatarGradient(uid):'var(--sf3)'}">
+        ${u ? u.nombre[0]+u.apellido[0] : '?'}
+      </div>
+      <div class="lb-info">
+        <div class="lb-name">${data.name}</div>
+        <div class="lb-sub">${data.goals} gol${data.goals!==1?'es':''}</div>
+      </div>
+      <div class="lb-val" style="color:var(--gold)">⚽ ${data.goals}</div>
+    </div>`;
+  }).join('')}
+</div>` : ''}
+   
 /* ══════════════════════════════════════════════
    HISTORIAL — Stats Screen
 ══════════════════════════════════════════════ */
