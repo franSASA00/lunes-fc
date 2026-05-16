@@ -3252,6 +3252,18 @@ const golesRanking = Object.entries(golesMap)
   .sort((a,b) => b[1].goals - a[1].goals)
   .slice(0, 5);
 
+// ── RANKING GOLEADORES ──
+const golesMap = {};
+history.forEach(m => {
+  (m.scorers||[]).forEach(s => {
+    if(!golesMap[s.uid]) golesMap[s.uid] = { name: s.name, goals: 0 };
+    golesMap[s.uid].goals += s.goals;
+  });
+});
+const golesRanking = Object.entries(golesMap)
+  .sort((a,b) => b[1].goals - a[1].goals)
+  .slice(0, 5);
+
     <!-- ── HISTORIAL ── -->
     <div class="section-title">📅 Historial de Partidos</div>
     ${history.length
