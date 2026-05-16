@@ -2787,48 +2787,6 @@ window.confirmGoal = function(scorerUid, team){
     scorerName: scorerName || null,
   });
 
-  // Actualizar DOM del live sin re-render completo
-  const sbEl = document.getElementById('live-scoreboard');
-  if(sbEl){
-    const sA=liveMatch.scoreA, sB=liveMatch.scoreB;
-    const aLeads=sA>sB, bLeads=sB>sA;
-    const scoreAEl=document.getElementById('sb-score-a');
-    const scoreBEl=document.getElementById('sb-score-b');
-    if(scoreAEl) scoreAEl.textContent=sA;
-    if(scoreBEl) scoreBEl.textContent=sB;
-    const popEl = team===0?scoreAEl:scoreBEl;
-    if(popEl){ popEl.classList.remove('score-pop'); void popEl.offsetWidth; popEl.classList.add('score-pop'); }
-    ['.side-a','.side-b'].forEach((sel,i)=>{
-      const el=sbEl.querySelector(sel); if(!el) return;
-      el.classList.remove('leading','trailing');
-      const leads=i===0?aLeads:bLeads, trails=i===0?bLeads:aLeads;
-      if(leads) el.classList.add('leading');
-      else if(trails) el.classList.add('trailing');
-    });
-    sbEl.classList.remove('goal-flash'); void sbEl.offsetWidth; sbEl.classList.add('goal-flash');
-    const halfEl=sbEl.querySelector('.live-sb-half');
-    if(halfEl) halfEl.textContent=liveMatch.active?'EN JUEGO':liveMatch.timer>0?'PAUSA':'ESPERA';
-    const timeline=document.getElementById('live-timeline');
-    if(timeline){
-      if(timeline.querySelector('[style*="Sin eventos"]')) timeline.innerHTML='';
-      const ev=liveMatch.events[liveMatch.events.length-1];
-      const item=document.createElement('div');
-      item.className='event-item';
-      item.innerHTML=`
-        <div class="event-time">${formatTimer(ev.time)}</div>
-        <div class="event-icon">⚽</div>
-        <div>
-          <div class="event-text">${ev.text}</div>
-          <div class="event-team" style="color:${team===0?'var(--cyan)':'var(--orange)'}">${team===0?'Equipo A':'Equipo B'}</div>
-        </div>`;
-      timeline.insertBefore(item, timeline.firstChild);
-    }
-  } else {
-    showTab('live');
-  }
-
-  showGoalBanner(team, liveMatch.scoreA, liveMatch.scoreB, scorerName);
-};
 
   // If live tab is active, update DOM in-place (no full re-render)
   const sbEl = document.getElementById('live-scoreboard');
