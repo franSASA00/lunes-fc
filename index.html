@@ -1882,6 +1882,22 @@ window.doLogout = async function(){
   showScreen('auth-screen');
 };
 
+/* ── LOADING PARTICLES ── */
+(function(){
+  const container = document.getElementById('load-particles');
+  if(!container) return;
+  for(let i=0;i<25;i++){
+    const p = document.createElement('div');
+    p.className = 'load-particle';
+    const x = Math.random()*100;
+    const dx = (Math.random()-0.5)*120;
+    const dur = 3 + Math.random()*4;
+    const delay = Math.random()*3;
+    p.style.cssText = `left:${x}%;--dx:${dx}px;animation-duration:${dur}s;animation-delay:${delay}s`;
+    container.appendChild(p);
+  }
+})();
+   
 /* ── AUTH STATE ── */
 onAuthStateChanged(auth, async (fbUser) => {
   hideLoading();
