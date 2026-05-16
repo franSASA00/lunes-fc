@@ -3130,15 +3130,26 @@ async function renderHistorial(el){
   const raterCount = rSnap.exists() ? Object.keys(rSnap.data().ratings||{}).length : 0;
   const eloRank = getEloRank(currentUser.elo||1000);
   const myMatches = history.filter(m=>m.teams?.some(t=>t.players?.some(p=>p.uid===currentUser.uid))).length;
-  const myWins   = history.filter(m=>{
+  const myWins = history.filter(m=>{
     const idx = m.teams?.findIndex(t=>t.players?.some(p=>p.uid===currentUser.uid));
     if(idx===-1||idx===undefined) return false;
     const sA=m.scoreA||0, sB=m.scoreB||0;
     return (idx===0&&sA>sB)||(idx===1&&sB>sA);
   }).length;
-
   const ovrCol = overallColor(overall);
   const skillBarColor = v => v>=80?'var(--gold)':v>=65?'var(--green)':v>=40?'var(--cyan)':'var(--orange)';
+
+  // ── RANKING GOLEADORES (se calcula ANTES del innerHTML) ──
+  const golesMap = {};
+  history.forEach(m => {
+    (m.scorers||[]).forEach(s => {
+      if(!golesMap[s.uid]) golesMap[s.uid] = { name: s.name, goals: 0 };
+      golesMap[s.uid].goals += s.goals;
+    });
+  });
+  const golesRanking = Object.entries(golesMap)
+    .sort((a,b) => b[1].goals - a[1].goals)
+    .slice(0, 5);
 
   el.innerHTML = `
     <div class="page-header">
@@ -3164,8 +3175,6 @@ async function renderHistorial(el){
         </div>
         <div class="stats-hero-overall" style="color:${ovrCol};filter:drop-shadow(0 0 12px ${ovrCol==='var(--gold)'?'rgba(255,214,0,.4)':ovrCol==='var(--green)'?'rgba(0,230,118,.4)':'rgba(0,212,255,.3)'})">${overall||'—'}</div>
       </div>
-
-      <!-- Skill bars -->
       <div class="stats-skill-bars">
         ${SKILLS.map(s=>{
           const v = stats[s]||0;
@@ -3183,18 +3192,9 @@ async function renderHistorial(el){
 
     <!-- ── QUICK STATS ── -->
     <div class="stats-grid">
-      <div class="stat-card">
-        <div class="val">${myMatches}</div>
-        <div class="lbl">Partidos</div>
-      </div>
-      <div class="stat-card">
-        <div class="val" style="color:var(--green)">${myWins}</div>
-        <div class="lbl">Victorias</div>
-      </div>
-      <div class="stat-card">
-        <div class="val" style="color:var(--gold)">${currentUser.mvpCount||0}</div>
-        <div class="lbl">MVPs</div>
-      </div>
+      <div class="stat-card"><div class="val">${myMatches}</div><div class="lbl">Partidos</div></div>
+      <div class="stat-card"><div class="val" style="color:var(--green)">${myWins}</div><div class="lbl">Victorias</div></div>
+      <div class="stat-card"><div class="val" style="color:var(--gold)">${currentUser.mvpCount||0}</div><div class="lbl">MVPs</div></div>
     </div>
 
     <!-- ── XP BAR ── -->
@@ -3236,19 +3236,92 @@ async function renderHistorial(el){
         <div class="achievement-name">Grupo 10+</div>
       </div>
     </div>
- 
-// ── RANKING GOLEADORES ──
-const golesMap = {};
-history.forEach(m => {
-  (m.scorers||[]).forEach(s => {
-    if(!golesMap[s.uid]) golesMap[s.uid] = { name: s.name, goals: 0 };
-    golesMap[s.uid].goals += s.goals;
-  });
-});
-const golesRanking = Object.entries(golesMap)
-  .sort((a,b) => b[1].goals - a[1].goals)
-  .slice(0, 5);
 
+    <!-- ── GOLEADORES DEL GRUPO ── -->
+    ${golesRanking.length ? `
+    <div class="section-title">⚽ Goleadores del Grupo</div>
+    <div class="leaderboard" style="margin-bottom:16px">
+      ${golesRanking.map(([uid, data], i) => {
+        const medals = ['🥇','🥈','🥉'];
+        const rankCls = ['r1','r2','r3'][i] || '';
+        const u = groupMembers.find(m=>m.uid===uid);
+        return `<div class="leaderboard-item ${i<3?'top'+(i+1):''}">
+          <div class="lb-rank ${rankCls}">${medals[i]||i+1}</div>
+          <div class="lb-avatar" style="background:${u?avatarGradient(uid):'var(--sf3)'}">
+            ${u ? u.nombre[0]+u.apellido[0] : '?'}
+          </div>
+          <div class="lb-info">
+            <div class="lb-name">${data.name}</div>
+            <div class="lb-sub">${data.goals} gol${data.goals!==1?'es':''}</div>
+          </div>
+          <div class="lb-val" style="color:var(--gold)">⚽ ${data.goals}</div>
+        </div>`;
+      }).join('')}
+    </div>` : ''}
+
+    <!-- ── HISTORIAL ── -->
+    <div class="section-title">📅 Historial de Partidos</div>
+    ${history.length
+      ? [...history].map(m=>{
+          const sA = m.scoreA||0, sB = m.scoreB||0;
+          const myTeamIdx = m.teams?.findIndex(t=>t.players?.some(p=>p.uid===currentUser.uid));
+          const iPlayed = myTeamIdx !== -1 && myTeamIdx !== undefined;
+          let itemCls = '', badgeHtml = '';
+          if(iPlayed){
+            const iWon = (myTeamIdx===0&&sA>sB)||(myTeamIdx===1&&sB>sA);
+            const isDraw = sA===sB;
+            if(isDraw){ itemCls='draw'; badgeHtml=`<span class="history-result-badge draw">Empate</span>`; }
+            else if(iWon){ itemCls='win'; badgeHtml=`<span class="history-result-badge win">Victoria</span>`; }
+            else { itemCls='loss'; badgeHtml=`<span class="history-result-badge loss">Derrota</span>`; }
+          }
+          const isDraw = sA===sB;
+          const getTeamCls = i => isDraw?'draw-side':(i===0?(sA>sB?'winner':'loser'):(sB>sA?'winner':'loser'));
+          const mvpName = m.mvp?(groupMembers.find(u=>u.uid===m.mvp)?.nombre||'MVP'):null;
+          return `<div class="history-item ${itemCls}">
+            <div class="history-header">
+              <div class="history-date">📅 ${m.date}</div>
+              ${badgeHtml}
+            </div>
+            <div class="history-scoreboard">
+              <div class="history-team ${getTeamCls(0)}">
+                <div class="history-team-name">Equipo A</div>
+                <div class="history-team-score">${sA}</div>
+                <div class="history-team-ovr">OVR ${m.teams[0]?.avg||'—'}</div>
+                <div class="history-team-players">${(m.teams[0]?.players||[]).slice(0,3).map(p=>p.nombre).join(', ')}${(m.teams[0]?.players||[]).length>3?'…':''}</div>
+              </div>
+              <div class="history-score-center">
+                <span class="history-score-sep">—</span>
+                <div class="history-score-label">Final</div>
+              </div>
+              <div class="history-team ${getTeamCls(1)}">
+                <div class="history-team-name">Equipo B</div>
+                <div class="history-team-score">${sB}</div>
+                <div class="history-team-ovr">OVR ${m.teams[1]?.avg||'—'}</div>
+                <div class="history-team-players">${(m.teams[1]?.players||[]).slice(0,3).map(p=>p.nombre).join(', ')}${(m.teams[1]?.players||[]).length>3?'…':''}</div>
+              </div>
+            </div>
+            ${(iPlayed || mvpName || (m.scorers||[]).length) ? `
+            <div class="history-footer">
+              ${iPlayed ? `<span class="chip chip-blue">✓ Jugaste</span>` : ''}
+              ${mvpName ? `<div class="history-mvp">⭐ MVP: ${mvpName}</div>` : ''}
+              ${(m.scorers||[]).length ? `
+                <div style="width:100%;margin-top:6px;display:flex;flex-wrap:wrap;gap:4px">
+                  ${[...m.scorers].sort((a,b)=>b.goals-a.goals).map(s=>`
+                    <span class="chip chip-gold" style="font-size:10px">
+                      ⚽ ${s.name}${s.goals>1?` <b>×${s.goals}</b>`:''}
+                    </span>`).join('')}
+                </div>` : ''}
+            </div>` : ''}
+          </div>`;
+        }).join('')
+      : `<div class="empty-state">
+          <div class="empty-icon-wrap">📋</div>
+          <div class="empty-title">Sin partidos aún</div>
+          <div class="empty-msg">Cuando guarden el primer partido va a aparecer el historial acá.</div>
+          <button class="empty-cta" onclick="showTab('asistencia')">ARRANCAR MATCH DAY →</button>
+        </div>`}
+  `;
+}
     <!-- ── HISTORIAL ── -->
     <div class="section-title">📅 Historial de Partidos</div>
     ${history.length
