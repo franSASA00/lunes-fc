@@ -2768,7 +2768,16 @@ function openScorerModal(team){
       <div class="scorer-btn-avatar" style="background:${avatarGradient(p.uid)}">${p.nombre[0]}${p.apellido[0]}</div>
       <div>
         <div class="scorer-btn-name">${p.nombre} ${p.apellido}</div>
-        <div class="scorer-btn-ovr">OVR ${p.ovr||'—'}</div>
+<div class="scorer-btn-ovr" style="display:flex;align-items:center;gap:5px">
+  OVR ${p.ovr||'—'}
+  ${(()=>{
+    const pb = {
+      DEL:'🔴',MED:'🟢',DEF:'🔵',ARQ:'🟡'
+    }[p.posicion]||'⚪';
+    const pl = {DEL:'DEL',MED:'MED',DEF:'DEF',ARQ:'ARQ'}[p.posicion]||'JUG';
+    return `<span style="font-size:9px;color:var(--tx3)">${pb} ${pl}</span>`;
+  })()}
+</div>
       </div>
     </button>`).join('');
 
