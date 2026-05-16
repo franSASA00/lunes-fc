@@ -404,18 +404,12 @@ input,select{font-family:inherit}
   position:relative;
 }
 #main-screen::before{
-  content:'';
-  position:fixed;inset:0;
-  background:url('./bg.jpg') center center / cover no-repeat;
-  opacity:0.08;
-  pointer-events:none;
-  z-index:0;
+  content:'';position:fixed;inset:0;
+  background:url('./bg.jpg') center/cover no-repeat;
+  opacity:0.06;pointer-events:none;z-index:0;
 }
 #main-screen .main-content,
-#main-screen .tab-bar{
-  position:relative;
-  z-index:1;
-}
+#main-screen .tab-bar{position:relative;z-index:1}
 
 /* ── TAB BAR — Glassmorphism v2 ── */
 .tab-bar{
