@@ -3326,10 +3326,18 @@ const golesRanking = Object.entries(golesMap)
                 <div class="history-team-players">${(m.teams[1]?.players||[]).slice(0,3).map(p=>p.nombre).join(', ')}${(m.teams[1]?.players||[]).length>3?'…':''}</div>
               </div>
             </div>
-            ${(iPlayed||mvpName)?`<div class="history-footer">
-              ${iPlayed?`<span class="chip chip-blue">✓ Jugaste</span>`:''}
-              ${mvpName?`<div class="history-mvp">⭐ MVP: ${mvpName}</div>`:''}
-            </div>`:''}
+            ${(iPlayed || mvpName || (m.scorers||[]).length) ? `
+<div class="history-footer">
+  ${iPlayed ? `<span class="chip chip-blue">✓ Jugaste</span>` : ''}
+  ${mvpName ? `<div class="history-mvp">⭐ MVP: ${mvpName}</div>` : ''}
+  ${(m.scorers||[]).length ? `
+    <div style="width:100%;margin-top:6px;display:flex;flex-wrap:wrap;gap:4px">
+      ${[...m.scorers].sort((a,b)=>b.goals-a.goals).map(s=>`
+        <span class="chip chip-gold" style="font-size:10px">
+          ⚽ ${s.name} ${s.goals>1?`<b>×${s.goals}</b>`:''}
+        </span>`).join('')}
+    </div>` : ''}
+</div>` : ''}
           </div>`;
         }).join('')
       : `<div class="empty-state">
