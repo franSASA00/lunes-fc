@@ -2829,10 +2829,6 @@ window.confirmGoal = function(scorerUid, team){
   showGoalBanner(team, liveMatch.scoreA, liveMatch.scoreB, scorerName);
 };
 
-window.closeScorerModal = function(){
-  document.getElementById('scorer-modal').classList.remove('open');
-};
-
   // If live tab is active, update DOM in-place (no full re-render)
   const sbEl = document.getElementById('live-scoreboard');
   if(sbEl){
