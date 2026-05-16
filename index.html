@@ -254,10 +254,7 @@ input,select{font-family:inherit}
 /* Field lines decoration */
 #auth-screen::before{
   content:'';position:absolute;inset:0;
-  background:
-    linear-gradient(rgba(0,212,255,.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0,212,255,.04) 1px, transparent 1px);
-  background-size:40px 40px;
+  background:rgba(6,8,16,0.75);  /* ← antes era solo grid lines */
   pointer-events:none;
 }
 .auth-logo{text-align:center;margin-bottom:32px;position:relative}
