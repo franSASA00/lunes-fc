@@ -840,7 +840,9 @@ canvas.radar-canvas{display:block;margin:0 auto}
 .goal-banner-title{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:3px;line-height:1}
 .goal-banner.banner-a .goal-banner-title{color:var(--cyan)}
 .goal-banner.banner-b .goal-banner-title{color:var(--orange)}
-.goal-banner-sub{font-size:11px;color:var(--tx2);letter-spacing:1px;margin-top:1px}
+function showGoalBanner(team, sA, sB, scorerName){
+  // ...igual que antes, solo cambiá la línea del sub:
+  <div class="goal-banner-sub">${scorerName ? scorerName : 'Equipo '+(team===0?'A':'B')}</div>
 .goal-banner-score{font-family:'Bebas Neue',sans-serif;font-size:36px;color:var(--tx);opacity:.9}
 
 /* ── Goal Buttons — bigger, more tactile ── */
