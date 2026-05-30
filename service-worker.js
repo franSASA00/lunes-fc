@@ -1,4 +1,4 @@
-const CACHE_NAME = 'lunesfc-v7';
+const CACHE_NAME = 'lunesfc-v8';
 const ASSETS = [
   './',
   './index.html',
