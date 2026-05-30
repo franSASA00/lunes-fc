@@ -3762,5 +3762,285 @@ window.undoGoal=window.undoGoal;
     });
   }
 </script>
+
+<!-- ══ POPUP CONFIRMACIÓN DE FECHA ══ -->
+<div id="confirm-popup-overlay" onclick="handleOverlayClick(event)">
+  <div class="confirm-popup" id="confirm-popup">
+    <div class="cp-header">
+      <div class="cp-badge">
+        <div class="cp-badge-dot"></div>
+        <span id="cp-badge-text">📅 Fecha programada</span>
+      </div>
+      <div class="cp-title" id="cp-title">Lunes · Semana 23</div>
+      <div class="cp-subtitle" id="cp-subtitle">Confirmá tu asistencia antes del domingo 23:59</div>
+    </div>
+    <div class="cp-details" id="cp-details">
+      <div class="cp-detail-row">
+        <div class="cp-detail-icon">📅</div>
+        <div>
+          <div class="cp-detail-label">Fecha y hora</div>
+          <div class="cp-detail-value" id="cp-datetime">—</div>
+        </div>
+      </div>
+      <div class="cp-detail-row">
+        <div class="cp-detail-icon">📍</div>
+        <div>
+          <div class="cp-detail-label">Lugar</div>
+          <div class="cp-detail-value" id="cp-lugar">—</div>
+        </div>
+      </div>
+      <div class="cp-detail-row">
+        <div class="cp-detail-icon">👥</div>
+        <div>
+          <div class="cp-detail-label">Cupo mínimo</div>
+          <div class="cp-detail-value" id="cp-cupo">—</div>
+        </div>
+      </div>
+    </div>
+    <div class="cp-form-section" id="cp-form-section">
+      <div class="cp-form-row">
+        <div class="cp-form-group">
+          <label class="cp-form-label">📅 Fecha</label>
+          <input type="date" class="cp-form-input" id="cp-input-fecha">
+        </div>
+        <div class="cp-form-group">
+          <label class="cp-form-label">⏰ Hora</label>
+          <input type="time" class="cp-form-input" id="cp-input-hora" value="21:00">
+        </div>
+      </div>
+      <div class="cp-form-group">
+        <label class="cp-form-label">📍 Lugar</label>
+        <input type="text" class="cp-form-input" id="cp-input-lugar-form" placeholder="Ej: Polideportivo Municipal">
+      </div>
+      <div class="cp-form-row">
+        <div class="cp-form-group">
+          <label class="cp-form-label">👥 Cupo mín.</label>
+          <input type="number" class="cp-form-input" id="cp-input-cupo-form" value="14" min="6" max="30">
+        </div>
+        <div class="cp-form-group">
+          <label class="cp-form-label">💰 Precio</label>
+          <input type="text" class="cp-form-input" id="cp-input-precio" placeholder="$ 0">
+        </div>
+      </div>
+    </div>
+    <div class="cp-counter" id="cp-counter-section">
+      <div class="cp-counter-label">Confirmados hasta ahora</div>
+      <div class="cp-counter-bar">
+        <div class="cp-counter-fill" id="cp-fill" style="width:0%"></div>
+      </div>
+      <div class="cp-counter-nums">
+        <div class="cp-counter-current" id="cp-count-num">0</div>
+        <div class="cp-counter-needed">Necesarios<span id="cp-count-needed">14</span></div>
+      </div>
+    </div>
+    <div class="cp-avatars" id="cp-avatars-section">
+      <div class="cp-avatar-stack" id="cp-avatar-stack"></div>
+      <div class="cp-avatars-text" id="cp-avatars-text">Nadie confirmó aún</div>
+    </div>
+    <div class="cp-actions">
+      <button class="cp-btn-yes" id="cp-btn-yes" onclick="handleConfirmPopup()">
+        <span id="cp-btn-icon">⚽</span>
+        <span id="cp-btn-text">¡Voy! Confirmar asistencia</span>
+      </button>
+      <button class="cp-btn-no" id="cp-btn-no" onclick="handleNoConfirmPopup()">
+        <span>✗</span><span>No puedo ir esta vez</span>
+      </button>
+      <button class="cp-btn-close" onclick="closeConfirmPopup()">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<div class="cp-toast" id="cp-toast">
+  <span>⚽</span>
+  <span id="cp-toast-text">¡Confirmado!</span>
+</div>
+
+<script>
+/* ══ POPUP CONTROLLER ══ */
+let _cpMode = 'view';
+let _cpUserConfirmed = false;
+let _cpCount = 0;
+let _cpNeeded = 14;
+let _cpCurrentDate = null;
+
+function openConfirmPopup(mode, dateData) {
+  _cpMode = mode;
+  if (dateData) _cpCurrentDate = dateData;
+
+  const ov = document.getElementById('confirm-popup-overlay');
+  const details = document.getElementById('cp-details');
+  const formSec = document.getElementById('cp-form-section');
+  const counterSec = document.getElementById('cp-counter-section');
+  const avatarsSec = document.getElementById('cp-avatars-section');
+  const btnNo = document.getElementById('cp-btn-no');
+  const badgeText = document.getElementById('cp-badge-text');
+  const title = document.getElementById('cp-title');
+  const subtitle = document.getElementById('cp-subtitle');
+  const btnYes = document.getElementById('cp-btn-yes');
+  const btnIcon = document.getElementById('cp-btn-icon');
+  const btnText = document.getElementById('cp-btn-text');
+
+  if (mode === 'create') {
+    badgeText.textContent = '✏️ Nueva fecha';
+    title.textContent = 'Crear Fecha';
+    subtitle.textContent = 'Completá los datos y publicá la convocatoria';
+    details.style.display = 'none';
+    formSec.style.display = 'flex';
+    counterSec.style.display = 'none';
+    avatarsSec.style.display = 'none';
+    btnNo.style.display = 'none';
+    btnIcon.textContent = '📅';
+    btnText.textContent = 'Publicar convocatoria';
+    btnYes.className = 'cp-btn-yes';
+    // Poner próximo lunes por defecto
+    const d = new Date();
+    const diff = d.getDay() === 0 ? 1 : 8 - d.getDay();
+    d.setDate(d.getDate() + diff);
+    document.getElementById('cp-input-fecha').value = d.toISOString().split('T')[0];
+  } else {
+    badgeText.textContent = '📅 Fecha programada';
+    details.style.display = 'flex';
+    formSec.style.display = 'none';
+    counterSec.style.display = 'block';
+    avatarsSec.style.display = 'flex';
+    btnNo.style.display = 'flex';
+
+    if (_cpCurrentDate) {
+      document.getElementById('cp-datetime').textContent = _cpCurrentDate.datetime || '—';
+      document.getElementById('cp-lugar').textContent = _cpCurrentDate.lugar || '—';
+      document.getElementById('cp-cupo').textContent = (_cpCurrentDate.cupo || 14) + ' jugadores necesarios';
+      _cpNeeded = _cpCurrentDate.cupo || 14;
+      _cpCount = _cpCurrentDate.confirmados || 0;
+      document.getElementById('cp-count-needed').textContent = _cpNeeded;
+    }
+
+    title.textContent = _cpCurrentDate ? _cpCurrentDate.titulo : 'Próxima Fecha';
+    subtitle.textContent = 'Confirmá tu asistencia antes del domingo 23:59';
+
+    if (_cpUserConfirmed) {
+      btnIcon.textContent = '✅';
+      btnText.textContent = 'Ya estás confirmado';
+      btnYes.className = 'cp-btn-yes confirmed';
+    } else {
+      btnIcon.textContent = '⚽';
+      btnText.textContent = '¡Voy! Confirmar asistencia';
+      btnYes.className = 'cp-btn-yes';
+    }
+    cpUpdateCounter(false);
+  }
+  ov.classList.add('open');
+}
+
+function closeConfirmPopup() {
+  document.getElementById('confirm-popup-overlay').classList.remove('open');
+}
+
+function handleOverlayClick(e) {
+  if (e.target.id === 'confirm-popup-overlay') closeConfirmPopup();
+}
+
+function handleConfirmPopup() {
+  if (_cpMode === 'create') {
+    const fecha = document.getElementById('cp-input-fecha').value;
+    const hora = document.getElementById('cp-input-hora').value;
+    const lugar = document.getElementById('cp-input-lugar-form').value || 'Por confirmar';
+    const cupo = parseInt(document.getElementById('cp-input-cupo-form').value) || 14;
+    if (!fecha) { document.getElementById('cp-input-fecha').style.borderColor = 'var(--red)'; return; }
+    
+    // Construir objeto fecha y guardar en localStorage
+    const dateStr = new Date(fecha + 'T' + hora);
+    const opts = { weekday:'long', day:'numeric', month:'short' };
+    const fechaData = {
+      titulo: 'Lunes · ' + dateStr.toLocaleDateString('es-AR', { month:'long', day:'numeric' }),
+      datetime: dateStr.toLocaleDateString('es-AR', opts) + ' · ' + hora + ' hs',
+      lugar: lugar,
+      cupo: cupo,
+      confirmados: 0
+    };
+    localStorage.setItem('lunesfc_proxima_fecha', JSON.stringify(fechaData));
+    _cpCurrentDate = fechaData;
+    _cpUserConfirmed = false;
+    _cpCount = 0;
+
+    cpShowToast('📅 Fecha creada y publicada', 'var(--cyan)');
+    setTimeout(() => {
+      closeConfirmPopup();
+      setTimeout(() => openConfirmPopup('view', fechaData), 400);
+    }, 1000);
+    return;
+  }
+
+  if (_cpUserConfirmed) return;
+  _cpUserConfirmed = true;
+  _cpCount++;
+
+  document.getElementById('cp-btn-icon').textContent = '✅';
+  document.getElementById('cp-btn-text').textContent = 'Ya estás confirmado';
+  document.getElementById('cp-btn-yes').className = 'cp-btn-yes confirmed';
+
+  cpAddAvatar('YO', 'linear-gradient(135deg,var(--cyan),#2255aa)');
+  cpUpdateCounter(true);
+  cpShowToast('⚽ ¡Confirmado! Nos vemos el lunes', 'var(--green)');
+  setTimeout(() => closeConfirmPopup(), 1800);
+}
+
+function handleNoConfirmPopup() {
+  if (_cpUserConfirmed) {
+    _cpUserConfirmed = false;
+    _cpCount = Math.max(0, _cpCount - 1);
+    cpUpdateCounter(false);
+    document.getElementById('cp-btn-icon').textContent = '⚽';
+    document.getElementById('cp-btn-text').textContent = '¡Voy! Confirmar asistencia';
+    document.getElementById('cp-btn-yes').className = 'cp-btn-yes';
+  }
+  cpShowToast('👋 Entendido, otra vez será', 'var(--tx2)');
+  setTimeout(() => closeConfirmPopup(), 1200);
+}
+
+function cpUpdateCounter(animate) {
+  const fill = document.getElementById('cp-fill');
+  const num = document.getElementById('cp-count-num');
+  const pct = Math.min(100, (_cpCount / _cpNeeded) * 100);
+  fill.style.width = pct + '%';
+  num.textContent = _cpCount;
+  fill.classList.toggle('full', pct >= 100);
+  num.classList.toggle('full', pct >= 100);
+  if (animate) {
+    num.style.transform = 'scale(1.4)';
+    setTimeout(() => { num.style.transform = 'scale(1)'; }, 200);
+  }
+}
+
+function cpAddAvatar(initials, bg) {
+  const stack = document.getElementById('cp-avatar-stack');
+  const av = document.createElement('div');
+  av.className = 'cp-avatar-item';
+  av.style.background = bg;
+  av.style.marginLeft = stack.children.length ? '-6px' : '0';
+  av.textContent = initials;
+  av.style.transform = 'scale(0)';
+  av.style.transition = 'transform .3s cubic-bezier(.22,1.2,.5,1)';
+  stack.insertBefore(av, stack.firstChild);
+  requestAnimationFrame(() => { av.style.transform = 'scale(1)'; });
+  const txt = document.getElementById('cp-avatars-text');
+  txt.textContent = _cpCount === 1 ? '1 persona confirmó' : _cpCount + ' personas confirmaron';
+}
+
+function cpShowToast(text, color) {
+  const t = document.getElementById('cp-toast');
+  document.getElementById('cp-toast-text').textContent = text;
+  t.style.color = color;
+  t.style.borderColor = color.replace(')', ',.35)').replace('var(', 'rgba(') || color;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// Cargar fecha guardada al iniciar (si existe)
+(function() {
+  const saved = localStorage.getItem('lunesfc_proxima_fecha');
+  if (saved) { try { _cpCurrentDate = JSON.parse(saved); } catch(e) {} }
+})();
+</script>
+   
 </body>
 </html>
