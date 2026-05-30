@@ -2756,13 +2756,6 @@ window.proponerFecha = async function(){
   currentGroup.proximaFecha = proximaFecha;
   showToast('📅 ¡Fecha propuesta!');
   showTab('asistencia');
-    const _fd = {
-      titulo: 'Lunes · ' + diaFormateado,
-      datetime: diaFormateado + ' · ' + hora + ' hs',
-      lugar: currentGroup?.lugar || 'Por confirmar',
-      cupo: min,
-      confirmados: 0
-    };
 
 window.cancelarFecha = async function(){
   if(!canManage()){ showToast('⚠️ No tenés permisos'); return; }
