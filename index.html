@@ -2756,6 +2756,18 @@ window.proponerFecha = async function(){
   currentGroup.proximaFecha = proximaFecha;
   showToast('📅 ¡Fecha propuesta!');
   showTab('asistencia');
+    const _fd = {
+      titulo: 'Lunes · ' + diaFormateado,
+      datetime: diaFormateado + ' · ' + hora + ' hs',
+      lugar: currentGroup?.lugar || 'Por confirmar',
+      cupo: min,
+      confirmados: 0
+    };
+    _cpCurrentDate = _fd;
+    _cpUserConfirmed = false;
+    _cpCount = 0;
+    localStorage.setItem('lunesfc_proxima_fecha', JSON.stringify(_fd));
+    setTimeout(() => openConfirmPopup('view', _fd), 400);
 };
 
 window.cancelarFecha = async function(){
@@ -2765,6 +2777,7 @@ window.cancelarFecha = async function(){
   currentGroup.proximaFecha = f;
   showToast('❌ Partido cancelado');
   showTab('asistencia');
+    if(va){ _cpUserConfirmed=true; _cpCount++; openConfirmPopup('view', _cpCurrentDate); }
 };
 
 window.borrarFecha = async function(){
