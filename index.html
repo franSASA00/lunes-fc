@@ -845,7 +845,7 @@ canvas.radar-canvas{display:block;margin:0 auto}
 ══════════════════════════════════════════════════════ */
 .live-badge{
   display:inline-flex;align-items:center;gap:6px;
-  background:rgba(255,23,68,.15);border:1px solid rgba(255,23,68,.4);
+  background:rgba(184,48,48,.12);border:1px solid rgba(184,48,48,.25);color:var(--red);
   border-radius:6px;padding:4px 10px;font-size:11px;font-weight:800;
   color:var(--red);letter-spacing:1px;text-transform:uppercase;
   animation:livePulse 1.5s ease infinite;
@@ -2572,7 +2572,7 @@ async function renderAsistencia(el){
               : `<div style="font-size:12px;color:var(--orange)">⚠️ Faltan ${fecha.minJugadores-n}</div>`}
           </div>`}
       ${isCreator && !fecha.cancelada ? `
-        <button onclick="cancelarFecha()" style="margin-top:12px;padding:8px 16px;border-radius:8px;background:rgba(255,23,68,.15);border:1px solid rgba(255,23,68,.3);color:var(--red);font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase">
+        <button onclick="cancelarFecha()" style="margin-top:12px;padding:8px 16px;border-radius:8px;background:rgba(184,48,48,.12);border:1px solid rgba(184,48,48,.25);color:var(--red);font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase">
           ❌ CANCELAR FECHA
         </button>` : ''}
       ${isCreator ? `
@@ -2721,9 +2721,9 @@ async function checkFechaPopup() {
         ">✓ VOY</button>
         <button onclick="responderFechaPopup(false)" style="
           padding:16px;border-radius:14px;
-          background:rgba(255,23,68,.15);
-          border:1px solid rgba(255,23,68,.3);
-          color:var(--red);font-size:15px;font-weight:800;letter-spacing:1px;
+          background:rgba(184,48,48,.12);
+            border:1px solid rgba(184,48,48,.25);
+            color:var(--red);font-size:15px;font-weight:800;letter-spacing:1px;
           text-transform:uppercase;cursor:pointer;
         ">✗ NO PUEDO</button>
       </div>
