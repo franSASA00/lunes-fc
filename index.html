@@ -2763,12 +2763,6 @@ window.proponerFecha = async function(){
       cupo: min,
       confirmados: 0
     };
-    _cpCurrentDate = _fd;
-    _cpUserConfirmed = false;
-    _cpCount = 0;
-    localStorage.setItem('lunesfc_proxima_fecha', JSON.stringify(_fd));
-    setTimeout(() => openConfirmPopup('view', _fd), 400);
-};
 
 window.cancelarFecha = async function(){
   if(!canManage()){ showToast('⚠️ No tenés permisos'); return; }
@@ -2777,8 +2771,6 @@ window.cancelarFecha = async function(){
   currentGroup.proximaFecha = f;
   showToast('❌ Partido cancelado');
   showTab('asistencia');
-    if(va){ _cpUserConfirmed=true; _cpCount++; openConfirmPopup('view', _cpCurrentDate); }
-};
 
 window.borrarFecha = async function(){
   await updateDoc(doc(db,'groups', currentGroup.id), { proximaFecha: null });
