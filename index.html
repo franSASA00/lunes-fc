@@ -133,7 +133,6 @@ input,select{font-family:inherit}
   font-family:'Bebas Neue',sans-serif;font-size:72px;letter-spacing:8px;line-height:1;
   background:linear-gradient(135deg,#fff 0%,var(--cyan) 50%,#0055ff 100%);
   background-size:200% 200%;
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
   animation:logoShimmer 2s ease infinite, logoReveal .6s ease .4s both;
 }
 @keyframes logoReveal{
@@ -262,7 +261,6 @@ input,select{font-family:inherit}
 .brand{
   font-family:'Bebas Neue',sans-serif;font-size:60px;letter-spacing:5px;
   background:linear-gradient(135deg,var(--cyan),#0077ff,var(--cyan));
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1;
 }
 .brand-badge{
   display:inline-block;background:linear-gradient(135deg,var(--gold),var(--gold2));
@@ -296,7 +294,6 @@ input,select{font-family:inherit}
   border:1px solid var(--br);
   border-radius:10px;color:var(--tx);
   font-size:15px;transition:border-color .2s,box-shadow .2s;
-  -webkit-appearance:none;
 }
 .form-input:focus{outline:none;border-color:var(--cyan);box-shadow:0 0 0 3px rgba(0,212,255,.1)}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -476,7 +473,6 @@ input,select{font-family:inherit}
   font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:800;
   letter-spacing:2px;text-transform:uppercase;
   background:linear-gradient(135deg,var(--tx),var(--tx2));
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
 }
 .page-subtitle{font-size:12px;color:var(--tx3);margin-top:2px;letter-spacing:.5px}
 
@@ -844,7 +840,7 @@ canvas.radar-canvas{display:block;margin:0 auto}
    LIVE MATCH v2 — Dramatic Scoreboard
 ══════════════════════════════════════════════════════ */
 .live-badge{
-  display:inline-flex;align-items:center;gap:6px;}
+  display:inline-flex;align-items:center;gap:6px;
   background:rgba(184,48,48,.12);border:1px solid rgba(184,48,48,.25);color:var(--red);
   border-radius:6px;padding:4px 10px;font-size:11px;font-weight:800;
   color:var(--red);letter-spacing:1px;text-transform:uppercase;
@@ -1125,7 +1121,6 @@ canvas.radar-canvas{display:block;margin:0 auto}
 }
 /* Filled track effect using background gradient */
 .slider-input{
-  -webkit-appearance:none;width:100%;height:4px;border-radius:3px;outline:none;cursor:pointer;
   background:var(--br);
   transition:background .1s;
 }
@@ -1690,7 +1685,6 @@ canvas.radar-canvas{display:block;margin:0 auto}
   color:var(--tx);font-size:15px;
   font-family:'Rajdhani',sans-serif;
   transition:border-color .2s,box-shadow .2s;
-  -webkit-appearance:none;width:100%;
 }
 .cp-form-input:focus{
   outline:none;border-color:var(--cyan);
@@ -2673,6 +2667,8 @@ window.eliminarMiembro = async function(uid){
   showTab('jugadores');
 };
 
+async function checkFechaPopup() {
+  const fecha = currentGroup.proximaFecha;
   if (!fecha || fecha.cancelada) return;
 
   // Si ya pasó el corte, no mostramos el popup
@@ -2755,7 +2751,7 @@ window.proponerFecha = async function(){
   showToast('📅 ¡Fecha propuesta!');
   showTab('asistencia');
 }
-   
+
 window.cancelarFecha = async function(){
   if(!canManage()){ showToast('⚠️ No tenés permisos'); return; }
   const f = {...currentGroup.proximaFecha, cancelada: true};
@@ -2764,8 +2760,6 @@ window.cancelarFecha = async function(){
   showToast('❌ Partido cancelado');
   showTab('asistencia');
 }
-
-window.borrarFecha
 
 window.borrarFecha = async function(){
   await updateDoc(doc(db,'groups', currentGroup.id), { proximaFecha: null });
@@ -3751,7 +3745,7 @@ window.toggleTimer=window.toggleTimer;
 window.resetTimer=window.resetTimer;
 window.addGoal=window.addGoal;
 window.undoGoal=window.undoGoal;
-}
+
 </script>
 
 <script>
