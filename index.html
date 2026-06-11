@@ -2763,6 +2763,9 @@ window.cancelarFecha = async function(){
   currentGroup.proximaFecha = f;
   showToast('❌ Partido cancelado');
   showTab('asistencia');
+}
+
+window.borrarFecha
 
 window.borrarFecha = async function(){
   await updateDoc(doc(db,'groups', currentGroup.id), { proximaFecha: null });
