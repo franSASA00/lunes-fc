@@ -2673,8 +2673,6 @@ window.eliminarMiembro = async function(uid){
   showTab('jugadores');
 };
 
-async function checkFechaPopup() {
-  const fecha = currentGroup.proximaFecha;
   if (!fecha || fecha.cancelada) return;
 
   // Si ya pasó el corte, no mostramos el popup
@@ -2756,7 +2754,8 @@ window.proponerFecha = async function(){
   currentGroup.proximaFecha = proximaFecha;
   showToast('📅 ¡Fecha propuesta!');
   showTab('asistencia');
-
+}
+   
 window.cancelarFecha = async function(){
   if(!canManage()){ showToast('⚠️ No tenés permisos'); return; }
   const f = {...currentGroup.proximaFecha, cancelada: true};
