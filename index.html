@@ -3586,24 +3586,6 @@ async function renderHistorial(el){
       </div>
     </div>
 
-    <!-- ── QUICK STATS ── -->
-    <div class="stats-grid">
-      <div class="stat-card"><div class="val">${myMatches}</div><div class="lbl">Partidos</div></div>
-      <div class="stat-card"><div class="val" style="color:var(--green)">${myWins}</div><div class="lbl">Victorias</div></div>
-      <div class="stat-card"><div class="val" style="color:var(--gold)">${currentUser.mvpCount||0}</div><div class="lbl">MVPs</div></div>
-    </div>
-
-    <!-- ── XP BAR ── -->
-    <div class="xp-bar" style="margin-bottom:16px">
-      <div class="xp-bar-top">
-        <div class="xp-bar-label">⚡ Nivel ${currentUser.level||1}</div>
-        <div class="xp-bar-val">${currentUser.xp||0} / ${((currentUser.level||1)*500)} XP</div>
-      </div>
-      <div class="xp-track">
-        <div class="xp-fill" style="width:${Math.min(100,((currentUser.xp||0)%500)/5)}%"></div>
-      </div>
-    </div>
-
     <!-- ── LOGROS ── -->
     <div class="section-title">🏅 Logros</div>
     <div class="achievements-row">
