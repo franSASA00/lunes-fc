@@ -2767,7 +2767,6 @@ window.borrarFecha = async function(){
   showTab('asistencia');
 };
 
-// ── Devuelve true si ya pasó el corte de 1 hora antes del partido ──
 function estaBloquadaAsistencia() {
   const fecha = currentGroup?.proximaFecha;
   if (!fecha || fecha.cancelada) return false;
@@ -3490,7 +3489,6 @@ async function renderHistorial(el){
   const ovrCol = overallColor(overall);
   const skillBarColor = v => v>=80?'var(--gold)':v>=65?'var(--green)':v>=40?'var(--cyan)':'var(--orange)';
 
-  // ── RANKING GOLEADORES (se calcula ANTES del innerHTML) ──
   const golesMap = {};
   history.forEach(m => {
     (m.scorers||[]).forEach(s => {
