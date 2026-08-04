@@ -1,0 +1,25 @@
+{
+  "name": "LunesFC — El FIFA del Fútbol Amateur",
+  "short_name": "LunesFC",
+  "description": "La app de fútbol amateur con estadísticas, sorteo de equipos y partido en vivo.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#060810",
+  "theme_color": "#060810",
+  "lang": "es",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
