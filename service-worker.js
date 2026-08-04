@@ -1,4 +1,4 @@
-const CACHE_NAME = 'lunesfc-v8';
+const CACHE_NAME = 'lunesfc-v9'; // bumped: file structure changed (CSS/JS split into separate files)
 const ASSETS = [
   './',
   './index.html',
